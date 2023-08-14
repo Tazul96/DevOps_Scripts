@@ -1,0 +1,253 @@
+Linux command line
+
+**List of files
+ ls
+
+** Current working directory
+ pwd
+ 
+** Change directory
+ cd
+ 
+** Back to previous directory
+ cd..
+
+** Back to previous previous directory
+ cd../..
+ 
+** Details of files and directory or property
+ ls -ltr
+ 
+** To create a file
+ touch filename
+
+** To create a file and write inside the file
+ // to edit read only file first change the root directory with type sudo su -
+ vi  filename
+ //type i for insert mode
+ //type esp to escape mode
+ //trpe :wq! to save file
+ // to preview inside the file type cat filename
+ // type rm to remove the file
+
+** Create directory
+mkdir directory name
+ //type rm -r remove the dirctory
+ 
+ 
+**
+
+
+**System
+
+disk size and Usages: df -h
+memory Dtails: free -g
+number of CPU: nproc
+To see all of this : top
+Update: sudo apt update >> sudo apt upgrade
+System reboot: sudo reboot
+clean: sudo apt autoremove --purge snapd
+
+
+**Node js:
+
+Install: sudo apt install -y curl >> curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - >> sudo apt install -y nodejs  >> node --version
+
+Uninstall: sudo apt-get remove nodejs >> sudo apt-get remove npm
+
+
+**PM2
+
+Install: sudo npm install pm2 -g
+Uninstall: sudo pm2 kill >> sudo npm remove pm2 -g
+test with : which pm2
+Status: pm2 status
+Save: pm2 save
+Logs: pm2 logs
+
+
+**NGINX:
+
+Install: sudo apt install nginx -y
+
+Enable: sudo systemctl enable nginx
+
+Start: sudo /etc/init.d/nginx start or  sudo nginx -s restart
+
+Stop: sudo systemctl stop nginx
+
+Restart : sudo systemctl restart nginx or sudo /etc/init.d/nginx restart or sudo nginx -s restart
+
+Disable: sudo systemctl disable nginx
+
+Status: sudo systemctl restart nginx
+
+Navigate files: ls >
+                /etc/nginx/sites-available
+				 or cd /etc/nginx/sites-available
+				
+Set server or domain: 
+
+/etc/nginx/sites-available$ ls
+default  >>>
+
+cd /etc/nginx/sites-available
+sudo cp default doamin name
+
+Configure server, locations: 
+server {
+        listen 80;
+        listen [::]:80;
+
+         root /home/ubuntu/apps/yelp-app/client/build;
+
+        # Add index.php to the list if you are using PHP
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name sanjeev.xyz www.sanjeev.xyz;
+
+        location / {
+                try_files $uri /index.html;
+        }
+
+         location /api {
+            proxy_pass http://localhost:3001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+}
+
+service nginx reload
+
+** Action Runner
+Failed install runner due to exist: 
+sudo ./svc.sh stop
+sudo ./svc.sh uninstall
+sudo ./config.sh remove --unattended --token <TOKEN>
+sudo ./svc.sh install
+sudo ./svc.sh start
+
+** Remove directories with empty file
+
+$ rmdir dir1
+
+** Remove directories with non-empty file
+$ rm -rf dir-name
+$ rm -rf /path/to/dir/name
+
+** Remove files
+https://linuxize.com/post/how-to-remove-files-and-directories-using-linux-command-line/#:~:text=1%20%20%23To%20delete%20a%20single%20file%2C%20use,use%20the%20following%20command%3A%20rm%20-fv%20%2A.txt%20
+
+
+** Enable Firewall
+sudo ufw status
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+sudo ufw enable
+sudo ufw status
+
+
+** Enable SSL with Let's Encrypt ( before this need to set the doamin and the records and ports for http and https)
+
+The step by step procedure is listed at: https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx.html
+
+Install Certbot
+
+sudo snap install --classic certbot >> sudo ln -s /snap/bin/certbot /usr/bin/certbot >> sudo certbot --nginx
+
+
+/home/ubuntu/frontendmain/_work/Ambel-Frontend-Main/Ambel-Frontend-Main/pages
+
+
+
+
+
+
+install nodejs latest, nginx, 
+
+ - run: sudo pm2 restart backend
+ 
+ 
+ Ambel-Backend-Main
+  Ambel-Frontend-Main
+  
+  frontend/_work/Ambel-Frontend-Main/Ambel-Frontend-Main
+  backend/_work/Ambel-Backend-Main/Ambel-Backend-Main
+  
+  index _app.jsx index.htm index.nginx-debian.html;
+  
+  /_work/Ambel-Frontend-Main/Ambel-Frontend-Main/.next/server/pages
+  
+  location /api {
+                proxy_pass  http://localhost:3000/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+	
+	
+	
+	
+	server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        # SSL configuration
+        #
+        # listen 443 ssl default_server;
+        # listen [::]:443 ssl default_server;
+        #
+        # Note: You should disable gzip for SSL traffic.
+        # See: https://bugs.debian.org/773332
+        #
+        # Read up on ssl_ciphers to ensure a secure configuration.
+        # See: https://bugs.debian.org/765782
+        #
+        # Self signed certs generated by the ssl-cert package
+        # Don't use them in a production server!
+        #
+        # include snippets/snakeoil.conf;
+
+        root /var/www/html;
+
+        # Add index.php to the list if you are using PHP
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location /api {
+                proxy_pass  http://localhost:8000/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+        location / {
+                proxy_pass  http://localhost:3000/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+
+	
+	cd frontend/_work/Ambel-Frontend-Main/Ambel-Frontend-Main/node_modules/next/dist/server
+	
+	
+	http://localhost:8000/api/auth/redirect/facebook
+	
+	frontend/_work/Ambel-Frontend-Main/Ambel-Frontend-Main
+	
+	npm run start
+	pm2 start npm -- start
+	
+	
+	vim /etc/ssh/sshd_config
+	
+	cd frontend/_work/Ambel-Frontend-Main/Ambel-Frontend-Main
+	cd backend/_work/Ambel-Backend-Main/Ambel-Backend-Main
