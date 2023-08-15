@@ -39,7 +39,6 @@ mkdir directory name
 
 
 **System
-
 disk size and Usages: df -h
 memory Dtails: free -g
 number of CPU: nproc
@@ -57,30 +56,22 @@ Uninstall: sudo apt-get remove nodejs >> sudo apt-get remove npm
 
 
 **PM2
-
-Install: sudo npm install pm2 -g
-Uninstall: sudo pm2 kill >> sudo npm remove pm2 -g
-test with : which pm2
-Status: pm2 status
-Save: pm2 save
-Logs: pm2 logs
+    Install: sudo npm install pm2 -g
+    Uninstall: sudo pm2 kill >> sudo npm remove pm2 -g
+    test with : which pm2
+    Status: pm2 status
+    Save: pm2 save
+    Logs: pm2 logs
 
 
 **NGINX:
-
-Install: sudo apt install nginx -y
-
-Enable: sudo systemctl enable nginx
-
-Start: sudo /etc/init.d/nginx start or  sudo nginx -s restart
-
-Stop: sudo systemctl stop nginx
-
-Restart : sudo systemctl restart nginx or sudo /etc/init.d/nginx restart or sudo nginx -s restart
-
-Disable: sudo systemctl disable nginx
-
-Status: sudo systemctl restart nginx
+    Install: sudo apt install nginx -y
+    Enable: sudo systemctl enable nginx
+    Start: sudo /etc/init.d/nginx start or  sudo nginx -s restart
+    Stop: sudo systemctl stop nginx
+    Restart : sudo systemctl restart nginx or sudo /etc/init.d/nginx restart or sudo nginx -s restart
+    Disable: sudo systemctl disable nginx
+    Status: sudo systemctl restart nginx
 
 Navigate files: ls >
                 /etc/nginx/sites-available
@@ -104,7 +95,7 @@ server {
         # Add index.php to the list if you are using PHP
         index index.html index.htm index.nginx-debian.html;
 
-        server_name sanjeev.xyz www.sanjeev.xyz;
+        server_name abc.xyz www.abc.xyz;
 
         location / {
                 try_files $uri /index.html;
@@ -124,41 +115,39 @@ server {
 service nginx reload
 
 ** Action Runner
-Failed install runner due to exist: 
-sudo ./svc.sh stop
-sudo ./svc.sh uninstall
-sudo ./config.sh remove --unattended --token <TOKEN>
-sudo ./svc.sh install
-sudo ./svc.sh start
+    Failed install runner due to exist: 
+    sudo ./svc.sh stop
+    sudo ./svc.sh uninstall
+    sudo ./config.sh remove --unattended --token <TOKEN>
+    sudo ./svc.sh install
+    sudo ./svc.sh start
 
 ** Remove directories with empty file
-
-$ rmdir dir1
+    $ rmdir dir1
 
 ** Remove directories with non-empty file
-$ rm -rf dir-name
-$ rm -rf /path/to/dir/name
+    $ rm -rf dir-name
+    $ rm -rf /path/to/dir/name
 
 ** Remove files
 https://linuxize.com/post/how-to-remove-files-and-directories-using-linux-command-line/#:~:text=1%20%20%23To%20delete%20a%20single%20file%2C%20use,use%20the%20following%20command%3A%20rm%20-fv%20%2A.txt%20
 
 
 ** Enable Firewall
-sudo ufw status
-sudo ufw allow ssh
-sudo ufw allow http
-sudo ufw allow https
-sudo ufw enable
-sudo ufw status
+    sudo ufw status
+    sudo ufw allow ssh
+    sudo ufw allow http
+    sudo ufw allow https
+    sudo ufw enable
+    sudo ufw status
 
 
 ** Enable SSL with Let's Encrypt ( before this need to set the doamin and the records and ports for http and https)
 
 The step by step procedure is listed at: https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx.html
 
-Install Certbot
-
-sudo snap install --classic certbot >> sudo ln -s /snap/bin/certbot /usr/bin/certbot >> sudo certbot --nginx
+**Install Certbot
+    sudo snap install --classic certbot >> sudo ln -s /snap/bin/certbot /usr/bin/certbot >> sudo certbot --nginx
 
 
 /home/ubuntu/frontendmain/_work/Ambel-Frontend-Main/Ambel-Frontend-Main/pages
@@ -247,7 +236,11 @@ install nodejs latest, nginx,
 	pm2 start npm -- start
 	
 	
-	vim /etc/ssh/sshd_config
+	**Create or Enable password Authentication
+        sudo su-
+        vim /etc/ssh/sshd_config >> Enable password Authentication "yes" >> Save with :qw!>> restart sshd
 	
 	cd frontend/_work/Ambel-Frontend-Main/Ambel-Frontend-Main
 	cd backend/_work/Ambel-Backend-Main/Ambel-Backend-Main
+
+    #Thank you
