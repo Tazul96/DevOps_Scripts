@@ -1,0 +1,28 @@
+#To check Docker Version
+	$ docker version
+	
+#List all Docker Images
+	$ docker images
+
+
+
+#Analayze Images
+	$ dive <imagename>:<tag>
+
+# To analyze need to install dive in the linux
+	$ DIVE_VERSION=$(curl -s "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+	$ curl -Lo dive.deb "https://github.com/wagoodman/dive/releases/latest/download/dive_${DIVE_VERSION}_linux_amd64.deb"
+	$ sudo apt install -y ./dive.deb
+	$ dive --version
+ 
+#remove dive
+	$ rm -rf dive.deb
+
+#See all Images
+    $docker images
+
+#see all running containers
+    $docker ps
+
+#See all containters that exist right now 
+    $docker ps -a
