@@ -255,8 +255,3 @@ install nodejs latest, nginx,
 	https://ambel.ca/api/v1/auth/social/facebook/callback
 	http://localhost:8000/api/v1/auth/social/facebook/callback
 	
-	Analyze "Test": sqp_d210608912c0211a73369a6ec434be3f7d7cd6e7
-	sqp_c2ec647fac830e83bf16d3277d5f10aa8fc9a1d4
-
-
-I:\Ambel\Code\My Contribution\sonar-scanner-5.0.1.3006-windows\bin>sonar-scanner.bat -D"sonar.projectKey=Test" -D"sonar.sources=I:\Ambel\Code\My Contribution\Ambel-Frontend-Main." -D"sonar.host.url=http://127.0.0.1:9000" -D"sonar.token=sqp_d210608912c0211a73369a6ec434be3f7d7cd6e7"
