@@ -1,0 +1,43 @@
+#Check current permissions
+ls -l
+
+CHMOD Permission List
+Numeric	Symbolic	Owner (User)	Group	Others	Description
+0000	--- --- ---	No access	No access	No access	No one can read, write, or execute.
+0700	rwx --- ---	Full access	No access	No access	Owner can read, write, and execute.
+0744	rwx r-- r--	Full access	Read only	Read only	Owner has full access, group and others can read only.
+0755	rwx r-x r-x	Full access	Read, execute	Read, execute	Owner has full access, group and others can read and execute.
+0644	rw- r-- r--	Read, write	Read only	Read only	Owner can read and write, group and others can read only.
+0664	rw- rw- r--	Read, write	Read, write	Read only	Owner and group can read and write, others can only read.
+0777	rwx rwx rwx	Full access	Full access	Full access	Everyone can read, write, and execute (use with caution).
+0766	rwx rw- rw-	Full access	Read, write	Read, write	Owner has full access, group and others can read and write.
+0555	r-x r-x r-x	Read, execute	Read, execute	Read, execute	Everyone can read and execute, but no one can write.
+0444	r-- r-- r--	Read only	Read only	Read only	Everyone can only read. No write or execute.
+0111	--x --x --x	Execute only	Execute only	Execute only	Everyone can execute, but no one can read or write.
+0222	-w- -w- -w-	Write only	Write only	Write only	Everyone can write, but no one can read or execute.
+0333	-wx -wx -wx	Write, execute	Write, execute	Write, execute	Everyone can write and execute, but no one can read.
+0666	rw- rw- rw-	Read, write	Read, write	Read, write	Everyone can read and write, but no one can execute.
+0500	r-x --- ---	Read, execute	No access	No access	Owner can read and execute, group and others have no access.
+0705	rwx --- r-x	Full access	No access	Read, execute	Owner has full access, others can read and execute.
+Explanation of Fields
+Numeric: The numeric value of the permission (e.g., 0755).
+Symbolic: The symbolic representation (e.g., rwx r-x r-x).
+Owner: Permissions for the owner of the file.
+Group: Permissions for the group associated with the file.
+Others: Permissions for everyone else (all other users).
+Understanding the Numeric Values
+Each permission is represented by a number:
+
+Read (r) = 4
+Write (w) = 2
+Execute (x) = 1
+You combine the numbers to form a 3-digit number for the owner, group, and others:
+
+0 = No permissions
+1 = Execute only
+2 = Write only
+3 = Write + Execute
+4 = Read only
+5 = Read + Execute
+6 = Read + Write
+7 = Read + Write + Execute

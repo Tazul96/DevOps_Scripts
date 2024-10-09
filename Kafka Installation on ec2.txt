@@ -1,0 +1,101 @@
+#Update the system and security patches
+
+sudo apt-get update
+sudo apt-get upgrade
+
+#Install java SDK which is required for kafka
+sudo apt install openjdk-21-jdk -y
+
+#Add kafka user to prvilage sudo permissions
+sudo adduser kafka
+sudo adduser kafka sudo
+su -l kafka
+
+
+#Install the kafka
+wget https://downloads.apache.org/kafka/3.8.0/kafka_2.13-3.8.0.tgz
+tar -xzf kafka_2.13-3.8.0.tgz
+mv kafka_2.13-3.8.0 kafka
+
+#Create log direory for zookeeper
+mkdir -p ~/kafka/data/zookeeper
+
+#update zookeeper settings which is required
+nano ~/kafka/config/zookeeper.properties
+dataDir=/home/kafka/kafka/data/zookeeper
+
+#Create log directory for kafka
+mkdir -p ~/kafka/data/kafka
+
+
+#update kafka settings which is required to access form other servers
+nano ~/kafka/config/server.properties
+log.dirs=/home/kafka/kafka/data/kafka
+delete.topic.enable = true
+advertised.listeners=PLAINTEXT://<aws ec2 public ip>:9092
+
+#up and running zookeeper in the background with systemd
+sudo nano /etc/systemd/system/zookeeper.service
+
+
+#paste the code on systemd file for zookeeper
+[Unit]
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User=kafka
+ExecStart=/home/kafka/kafka/bin/zookeeper-server-start.sh /home/kafka/kafka/config/zookeeper.properties
+ExecStop=/home/kafka/kafka/bin/zookeeper-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+
+#up and running kafka in the background with systemd
+sudo nano /etc/systemd/system/kafka.service
+
+
+#paste the code on systemd file for kafka
+
+[Unit]
+Requires=zookeeper.service
+After=zookeeper.service
+
+[Service]
+Type=simple
+User=kafka
+ExecStart=/bin/sh -c '/home/kafka/kafka/bin/kafka-server-start.sh /home/kafka/kafka/config/server.properties > /home/kafka/kafka/kafka.log 2>&1'
+ExecStop=/home/kafka/kafka/bin/kafka-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+
+#reload the deamon
+sudo systemctl daemon-reload
+
+#start and enable zookeeper and kafka
+sudo systemctl start zookeeper
+sudo systemctl enable zookeeper
+
+sudo systemctl start kafka
+sudo systemctl enable kafka
+
+#limit the resource if necessary
+nano ~/.bashrc
+export KAFKA_HEAP_OPTS="-Xmx512M -Xms256M"
+Or 
+export KAFKA_HEAP_OPTS="-Xmx256M -Xms128M"
+source ~/.bashrc
+
+#create topic, producer and consumer
+
+bin/kafka-topics.sh --create --topic message --bootstrap-server <aws ec2 public ip>:9092 --replication-factor 1 --partitions 1
+
+bin/kafka-console-producer.sh --topic message --bootstrap-server <aws ec2 public ip>:9092 
+
+bin/kafka-console-consumer.sh --topic message --bootstrap-server <aws ec2 public ip>:9092
+
+bin/kafka-console-consumer.sh --topic testing_message_topic --bootstrap-server 15.157.15.115:9092
