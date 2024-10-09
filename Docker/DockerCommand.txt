@@ -26,3 +26,5 @@
 
 #See all containters that exist right now 
     $docker ps -a
+#restart all stop conainers
+	$docker start $(docker ps -a -q -f status=exited)

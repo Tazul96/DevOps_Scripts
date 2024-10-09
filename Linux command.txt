@@ -82,6 +82,18 @@ Disable: sudo systemctl disable nginx
 
 Status: sudo systemctl restart nginx
 
+
+Removes all but config files.
+
+sudo apt-get remove nginx nginx-common -y
+Removes everything.
+
+sudo apt-get purge nginx nginx-common -y
+After using any of the above commands, use this in order to remove dependencies used by nginx which are no longer required.
+
+sudo apt-get autoremove -y
+
+
 Navigate files: ls >
                 /etc/nginx/sites-available
 				 or cd /etc/nginx/sites-available
@@ -221,14 +233,14 @@ install nodejs latest, nginx,
         server_name _;
 
         location /api {
-                proxy_pass  http://localhost:8000/;
+                proxy_pass  http://localhost:8000;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
         location / {
-                proxy_pass  http://localhost:3000/;
+                proxy_pass  http://localhost:3000;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -255,3 +267,118 @@ install nodejs latest, nginx,
 	https://ambel.ca/api/v1/auth/social/facebook/callback
 	http://localhost:8000/api/v1/auth/social/facebook/callback
 	
+	Analyze "Test": sqp_d210608912c0211a73369a6ec434be3f7d7cd6e7
+	sqp_c2ec647fac830e83bf16d3277d5f10aa8fc9a1d4
+
+
+I:\Ambel\Code\My Contribution\sonar-scanner-5.0.1.3006-windows\bin>sonar-scanner.bat -D"sonar.projectKey=Test" -D"sonar.sources=I:\Ambel\Code\My Contribution\Ambel-Frontend-Main." -D"sonar.host.url=http://127.0.0.1:9000" -D"sonar.token=sqp_d210608912c0211a73369a6ec434be3f7d7cd6e7"
+
+
+		location /api {
+            proxy_pass http://backend_app:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+        location / {
+            proxy_pass http://frontend_app:3000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+
+
+uses: aws-actions/configure-aws-credentials@v4.0.1
+
+
+
+
+
+
+
+
+ server_name _;
+
+        location /api {
+                proxy_pass  http://localhost:8000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+        location / {
+                proxy_pass  http://localhost:3000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+        location /socket.io {
+                proxy_pass http://localhost:8000;  # Adjust the backend address and port
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_cache_bypass $http_upgrade;
+
+        # Increase the timeout values for long-lived connections
+        proxy_read_timeout 86400;
+        proxy_send_timeout 86400;
+
+        # Additional settings to handle larger payloads, if needed
+        proxy_buffering off;
+        proxy_ignore_client_abort on;
+    }
+
+
+
+		location /api {
+                proxy_pass  http://localhost:8000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+        location / {
+                proxy_pass  http://localhost:3000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+
+		location /socket.io/ {
+						 proxy_pass http://localhost:8000;
+						 proxy_http_version 1.1;
+						 proxy_set_header Upgrade $http_upgrade;
+						 proxy_set_header Connection 'upgrade';
+						 proxy_set_header Host $host;
+						 proxy_set_header X-Real-IP $remote_addr;
+						 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+						 proxy_set_header X-Forwarded-Proto $scheme;
+						 proxy_cache_bypass $http_upgrade;
+
+        # Increase the timeout values for long-lived connections
+        proxy_read_timeout 86400;
+        proxy_send_timeout 86400;
+
+        # Additional settings to handle larger payloads, if needed
+        proxy_buffering off;
+        proxy_ignore_client_abort on;
+
+}
+location /wsapp {
+                proxy_pass http:/localhost:8080;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "Upgrade";
+                proxy_set_header Host $host;
+                proxy_hide_header 'Access-Control-Allow-Origin';
+}
