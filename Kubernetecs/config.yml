@@ -148,5 +148,4 @@ metadata:
     kops.k8s.io/cluster: ambel.ca
   name: admin
 spec:
-  publicKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPqK0RCuFDDGDJEf/FuRQiirRRY1fdBPIPfgbSg5bSjW
-    root@ip-172-31-6-223
+  publicKey: ****************************************************************

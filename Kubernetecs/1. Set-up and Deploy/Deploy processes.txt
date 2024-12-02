@@ -45,6 +45,7 @@ sudo nano /etc/sysctl.d/kubernetes.conf
 
 sudo sysctl --system
 
+###Set Host machine name
 sudo hostnamectl set-hostname master-node #In master-node
 sudo hostnamectl set-hostname worker01 #In worker 1
 sudo hostnamectl set-hostname worker02 #In worker 2
@@ -64,6 +65,7 @@ sudo nano /etc/hosts
 
 sudo reboot
 
+##Set up environment for control groups to containerized processes in .
 sudo nano /etc/default/kubelet
 
 KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
@@ -87,7 +89,7 @@ sudo nano /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 sudo systemctl restart systemd-networkd
 
-sudo mkdir -p /etc/systemd/system/kubelet.service.d
+sudo mkdir -p /etc/systemd/system/kubelet.service.d 
 
 sudo cat /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf ( copy the file and add a new section annd submit in next step.)
 
@@ -118,6 +120,10 @@ sudo systemctl daemon-reload && sudo systemctl restart kubelet
 
 sudo kubeadm init --control-plane-endpoint=master-node --upload-certs
 
+or 
+
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 #if don't have network created yet or create network automatically after init
+
 
 kubeadm join master-node:6443 --token gurardim \
         --discovery-token-ca-cert-hash 
@@ -129,14 +135,11 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-
-
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 
 or 
 
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml  #if want to setup calico network
 
 
 Troubleshoot:
