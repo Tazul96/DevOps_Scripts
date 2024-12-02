@@ -3,13 +3,14 @@ S3 BUCKET
 IAM ROLE AND ASSIGN IT TO EC2 
 CREATE A EC2 INSTANCE AND GENERATE SSH ROLE
 download Kops and Kubectl to usr/local/bin and change permissions.
+wget https://github.com/kubernetes/kops/releases/download/v1.30.0/kops-linux-amd64
 
 # Download Kubectl and give permissions.
 # edit .bashrc and add all the env variables 
 
 export NAME=ambel.ca
 export KOPS_STATE_STORE=s3://ambel.ca
-export AWS_REGION=ap-southeast-1
+export AWS_REGION=ca-central-1
 export CLUSTER_NAME=ambel.ca
 export EDITOR='/usr/bin/nano'
 #export K8S_VERSION=1.6.4
@@ -19,20 +20,31 @@ export EDITOR='/usr/bin/nano'
 # Create a Cluster using Kops and generate a cluster file and save it carefully and do neccessary changes
 
 kops create cluster --name=ambel.ca\
---state=s3://ambel.ca --zones=ap-southeast-1a,ap-southeast-1b \
---node-count=2 --control-plane-count=1 --node-size=t3.medium --control-plane-size=t3.medium \
---control-plane-zones=ap-southeast-1a --control-plane-volume-size 10 --node-volume-size 10 \
+--state=s3://ambel.ca --zones=ca-central-1a,ca-central-1b,ca-central-1c \
+--node-count=1 --control-plane-count=1 --node-size=t3a.medium --control-plane-size=t3a.medium \
+--control-plane-zones=ca-central-1a --control-plane-volume-size 10 --node-volume-size 10 \
 --ssh-public-key ~/.ssh/id_ed25519.pub \
 --dns-zone=ambel.ca --dry-run --output yaml
+
+
+#Edit the cluster
+kops create cluster --name=ambel.ca \
+--state=s3://ambel.ca --zones=ca-central-1a,ca-central-1b \
+--node-count=1 --control-plane-count=1 --node-size=t3a.medium --control-plane-size=t3a.medium \
+--control-plane-zones=ca-central-1a --control-plane-volume-size 10 --node-volume-size 10 \
+--ssh-public-key ~/.ssh/id_ed25519.pub \
+--dns-zone=ambel.ca \
+--cloud-labels="kubernetes.io/cluster-autoscaler/enabled=true" \
+--dry-run --output yaml
 
 
 
 # 6 Node cluster 
 
 # kops create cluster --name=ambel.ca \
-# --state=s3://ambel.ca --zones=ap-southeast-1a,ap-southeast-1b,ap-southeast-1c \
+# --state=s3://ambel.ca --zones=ca-central-1a,ca-central-1b,ca-central-1c \
 # --node-count=3 --master-count=3 --node-size=t3.medium --master-size=t3.medium \
-# --master-zones=ap-southeast-1a,ap-southeast-1b,ap-southeast-1c --master-volume-size 10 --node-volume-size 10 \
+# --master-zones=ca-central-1a,ca-central-1b,ca-central-1c --master-volume-size 10 --node-volume-size 10 \
 # --ssh-public-key ~/.ssh/id_rsa.pub \
 # --dns-zone=ambel.ca --dry-run --output yaml
 

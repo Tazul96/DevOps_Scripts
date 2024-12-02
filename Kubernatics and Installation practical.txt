@@ -1,0 +1,309 @@
+###Create k8s user
+sudo adduser k8s
+sudo usermod -aG sudo k8s
+su - k8s
+
+
+sudo apt update
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl status docker
+sudo systemctl start docker
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt update
+
+sudo apt install kubeadm kubelet kubectl
+
+sudo apt-mark hold kubeadm kubelet kubectl
+
+sudo swapoff -a
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo nano /etc/modules-load.d/containerd.conf
+	overlay
+	br_netfilter
+
+sudo modprobe overlay
+
+sudo modprobe br_netfilter
+sudo nano /etc/sysctl.d/kubernetes.conf
+	net.bridge.bridge-nf-call-ip6tables = 1
+	net.bridge.bridge-nf-call-iptables = 1
+	net.ipv4.ip_forward = 1
+
+sudo sysctl --system
+
+sudo hostnamectl set-hostname master-node     # If needed: sudo hostnamectl set-hostname worker01
+
+sudo nano /etc/hosts
+
+-- Add master note and server ip6tables
+	127.0.0.1       localhost
+	127.0.1.1       vmi2285330.contaboserver.net    vmi2285330
+	147.93.132.49   master-node
+
+	# The following lines are desirable for IPv6 capable hosts
+	::1     localhost ip6-localhost ip6-loopback ff02::1 ip6-allnodes ff02::2 ip6-allrouters
+
+
+sudo reboot
+
+sudo nano /etc/default/kubelet
+
+KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
+
+sudo systemctl daemon-reload && sudo systemctl restart kubelet
+
+sudo nano /etc/docker/daemon.json
+	{
+      "exec-opts": ["native.cgroupdriver=systemd"],
+      "log-driver": "json-file",
+      "log-opts": {
+      "max-size": "100m"
+   },
+       "storage-driver": "overlay2"
+       }
+	   
+	   
+sudo systemctl daemon-reload && sudo systemctl restart docker
+
+sudo nano /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+sudo systemctl restart systemd-networkd
+
+
+sudo mkdir -p /etc/systemd/system/kubelet.service.d
+
+sudo cat /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf ( copy the file and add a new section annd submit in next step.)
+
+sudo nano /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+	Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"
+
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+
+sudo systemctl daemon-reload && sudo systemctl restart kubelet
+
+sudo kubeadm init --control-plane-endpoint=master-node --upload-certs
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+
+or 
+
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+
+Troubleshoot:
+
+lsmod | grep iptable
+modprobe iptable_filter
+modprobe iptable_nat
+modprobe iptable_mangle
+modprobe ip6table_filter
+
+
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+
+
+
+
+
+
+
+
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+kubectl edit service kubernetes-dashboard -n kubernetes-dashboard
+
+nodePort: 30001 under ports.
+changed type: ClusterIP to type: NodePort.
+
+
+kubectl get services --all-namespaces -o jsonpath='{range .items[*]}{.spec.ports[*].nodePort}{"\n"}{end}'
+kubectl get services -n kubernetes-dashboard
+
+vim kubernetes-dashboard-admin-user.yml
+	apiVersion: v1
+	kind: ServiceAccount
+	metadata:
+	  name: admin-user
+	  namespace: kubernetes-dashboard
+	---
+	apiVersion: rbac.authorization.k8s.io/v1
+	kind: ClusterRoleBinding
+	metadata:
+	  name: admin-user
+	roleRef:
+	  apiGroup: rbac.authorization.k8s.io
+	  kind: ClusterRole
+	  name: cluster-admin
+	subjects:
+	- kind: ServiceAccount
+	  name: admin-user
+	  namespace: kubernetes-dashboard
+
+
+kubectl apply -f kubernetes-dashboard-admin-user.yml
+kubectl get serviceaccounts -n kubernetes-dashboard
+kubectl create token admin-user -n kubernetes-dashboard
+
+
+https://Node-IP:30001.
+
+
+ kubectl get service -n ingress-nginx ingress-nginx-controller
+
+
+
+
+
+
+kubeadm join master-node:6443 --token 8mewci.0ro7m7wkdaw6ylx0 \
+        --discovery-token-ca-cert-hash sha256:a22d97a426bb662f113793278a8ba68c2c2feffdaeb8cf5a269f4efb1bb79b3b \
+        --control-plane --certificate-key 0e7a8ebdbf4fac1b52c4f992caffdf18b74ff2f81f8a4b724a0b3914763f1e0d
+		
+		
+		
+		
+		
+#Commands
+
+--------------------
+
+
+###Cluster and Context Management###
+kubectl cluster-info
+kubectl config current-context
+kubectl config get-contexts
+kubectl config use-context <context-name>
+kubectl config view
+kubectl config set-context <context-name>
+
+###Pods and Namespaces###
+kubectl get pods
+kubectl get pods --all-namespaces
+kubectl get pods --all-namespaces
+kubectl get pods -n <namespace>
+kubectl describe pod <pod-name>
+kubectl create -f <file-name>.yaml
+kubectl delete pod <pod-name>
+kubectl get pod <pod-name> -o wide
+
+
+
+###Deployments###
+kubectl get deployments -n <namespace>
+kubectl create deployment <deployment-name> --image=<image-name>
+kubectl set image deployment/<deployment-name> <container-name>=<new-image>
+kubectl scale deployment <deployment-name> --replicas=<number-of-replicas>
+kubectl rollout undo deployment/<deployment-name>
+kubectl rollout status deployment/<deployment-name>
+kubectl delete deployment <deployment-name>
+
+
+
+###Services###
+kubectl get svc -n <namespace>
+kubectl expose pod <pod-name> --port=<port> --name=<service-name> --type=<service-type>
+kubectl describe svc <service-name>
+kubectl delete svc <service-name>
+
+
+###Namespaces###
+kubectl get namespaces
+kubectl create namespace <namespace-name>
+kubectl delete namespace <namespace-name>
+
+
+###ConfigMaps and Secrets###
+kubectl get configmaps
+kubectl create configmap <configmap-name> --from-literal=<key>=<value>
+kubectl delete configmap <configmap-name>
+kubectl get secrets
+kubectl create secret generic <secret-name> --from-literal=<key>=<value>
+kubectl delete secret <secret-name>
+
+
+###Ingress###
+kubectl get ingress
+kubectl apply -f <ingress-file>.yaml
+kubectl describe ingress <ingress-name>
+kubectl delete ingress <ingress-name>
+
+
+8. Logs and Monitoring
+View logs of a pod:
+kubectl logs <pod-name>
+View logs of a container in a pod:
+kubectl logs <pod-name> -c <container-name>
+Follow logs of a pod in real-time:
+kubectl logs -f <pod-name>
+
+
+9. Nodes
+List nodes in the cluster:
+kubectl get nodes
+
+kubectl describe node <node-name>
+
+
+
+kubectl cordon <node-name>
+
+
+kubectl uncordon <node-name>
+Drain a node (evacuate all pods):
+
+
+kubectl drain <node-name>
+Delete a node:
+
+
+kubectl delete node <node-name>
+
+
+10. Volumes
+List persistent volumes (PVs):
+kubectl get pv
+List persistent volume claims (PVCs):
+kubectl get pvc
+Create a PVC (from a YAML file):
+kubectl apply -f <pvc-file>.yaml
+
+11. Helm (if Helm is installed)
+Install Helm (if the script is available):
+./get_helm.sh
+List Helm charts/releases:
+helm list
+Install a Helm chart:
+helm install <release-name> <chart-name>
+Upgrade a Helm release:
+helm upgrade <release-name> <chart-name>
+Uninstall a Helm release:
+helm uninstall <release-name>
+
+
+12. Other Useful Commands
+Apply changes from a YAML file (create or update):
+kubectl apply -f <file-name>.yaml
+Delete resources (e.g., pod, deployment) using a YAML file:
+kubectl delete -f <file-name>.yaml
+Get the current Kubernetes API version:
+kubectl version
+Get detailed information about a resource:
+kubectl describe <resource-type> <resource-name>
+Get the cluster’s resource usage:
+kubectl top pod
+Execute a command in a pod (e.g., opening a shell):
+kubectl exec -it <pod-name> -- /bin/bash
+kubectl get pods --all-namespaces

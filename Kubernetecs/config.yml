@@ -1,0 +1,152 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  creationTimestamp: null
+  name: ambel.ca
+spec:
+  api:
+    dns: {}
+  authorization:
+    rbac: {}
+  channel: stable
+  cloudLabels:
+    kubernetes.io/cluster-autoscaler/enabled: "true"
+  cloudProvider: aws
+  configBase: s3://ambel.ca/ambel.ca
+  dnsZone: ambel.ca
+  etcdClusters:
+  - cpuRequest: 200m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: control-plane-ca-central-1a
+      name: a
+    manager:
+      backupRetentionDays: 90
+    memoryRequest: 100Mi
+    name: main
+  - cpuRequest: 100m
+    etcdMembers:
+    - encryptedVolume: true
+      instanceGroup: control-plane-ca-central-1a
+      name: a
+    manager:
+      backupRetentionDays: 90
+    memoryRequest: 100Mi
+    name: events
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  kubeProxy:
+    enabled: false
+  kubelet:
+    anonymousAuth: false
+  kubernetesApiAccess:
+  - 0.0.0.0/0
+  - ::/0
+  kubernetesVersion: 1.30.2
+  masterPublicName: api.ambel.ca
+  networkCIDR: 172.20.0.0/16
+  networking:
+    cilium:
+      enableNodePort: true
+  nonMasqueradeCIDR: 100.64.0.0/10
+  sshAccess:
+  - 0.0.0.0/0
+  - ::/0
+  subnets:
+  - cidr: 172.20.0.0/17
+    name: ca-central-1a
+    type: Public
+    zone: ca-central-1a
+  - cidr: 172.20.128.0/17
+    name: ca-central-1b
+    type: Public
+    zone: ca-central-1b
+  topology:
+    dns:
+      type: Public
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: ambel.ca
+  name: control-plane-ca-central-1a
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
+  machineType: t3a.medium
+  maxSize: 1
+  minSize: 1
+  role: Master
+  rootVolumeSize: 10
+  subnets:
+  - ca-central-1a
+  mixedInstancesPolicy:   # Add this block
+    instances:            # List the instance types to be used in the pool
+      - t3a.medium
+    onDemandPercentage: 0 # Set this to 0 to ensure all instances are spot
+    spotInstancePools: 3
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: ambel.ca
+  name: nodes-ca-central-1a
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
+  machineType: t3a.medium
+  maxSize: 1
+  minSize: 1
+  role: Node
+  rootVolumeSize: 10
+  subnets:
+  - ca-central-1a
+  mixedInstancesPolicy:   # Add this block
+    instances:            # List the instance types to be used in the pool
+      - t3a.medium
+    onDemandPercentage: 0 # Set this to 0 to ensure all instances are spot
+    spotInstancePools: 3
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: ambel.ca
+  name: nodes-ca-central-1b
+spec:
+  image: 099720109477/ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20240607
+  machineType: t3a.medium
+  maxSize: 0
+  minSize: 0
+  role: Node
+  rootVolumeSize: 10
+  subnets:
+  - ca-central-1b
+  mixedInstancesPolicy:   # Add this block
+    instances:            # List the instance types to be used in the pool
+      - t3a.medium
+    onDemandPercentage: 0 # Set this to 0 to ensure all instances are spot
+    spotInstancePools: 3
+
+---
+
+apiVersion: kops.k8s.io/v1alpha2
+kind: SSHCredential
+metadata:
+  creationTimestamp: null
+  labels:
+    kops.k8s.io/cluster: ambel.ca
+  name: admin
+spec:
+  publicKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPqK0RCuFDDGDJEf/FuRQiirRRY1fdBPIPfgbSg5bSjW
+    root@ip-172-31-6-223
