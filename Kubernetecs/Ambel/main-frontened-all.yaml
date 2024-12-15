@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-frontend
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-frontend
+  template:
+    metadata:
+      labels:
+        app: main-frontend
+    spec:
+      containers:
+      - name: main-frontend
+        image: tazul96/ambel:PF-latest
+        ports:
+          - containerPort: 3000
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-frontend
+  namespace: production
+spec:
+  selector:
+    app: main-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-frontend-ingress
+  namespace: production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ambel.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: main-frontend
+                port:
+                  number: 80
+
+
+
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-frontend
+  namespace: test
+  labels:
+    app: main-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-frontend
+  template:
+    metadata:
+      labels:
+        app: main-frontend
+    spec:
+      containers:
+      - name: main-frontend
+        image: tazul96/ambel:PF-latest
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-frontend
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: main-frontend

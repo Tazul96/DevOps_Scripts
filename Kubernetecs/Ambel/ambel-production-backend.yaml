@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-backend
+  namespace: production
+  labels:
+    app: main-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-backend
+  template:
+    metadata:
+      labels:
+        app: main-backend
+    spec:
+      containers:
+      - name: main-backend
+        image: tazul96/ambel:PB-latest
+        ports:
+        - containerPort: 8000
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-backend
+  namespace: production
+  labels:
+    app: message-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-backend
+  template:
+    metadata:
+      labels:
+        app: message-backend
+    spec:
+      containers:
+      - name: message-backend
+        image: tazul96/ambel:PMB-latest
+        ports:
+        - containerPort: 8001
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-backend
+  namespace: production
+spec:
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: main-backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-backend
+  namespace: production
+spec:
+  ports:
+  - port: 80
+    targetPort: 8001
+  selector:
+    app: message-backend

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-frontend
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-frontend
+  template:
+    metadata:
+      labels:
+        app: message-frontend
+    spec:
+      containers:
+        - name: message-frontend
+          image: tazul96/ambel:PMF-latest
+          ports:
+            - containerPort: 3001
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-frontend
+  namespace: production  # Make sure the service is in the same namespace as the deployment
+spec:
+  selector:
+    app: message-frontend
+  ports:
+    - protocol: TCP
+      port: 80      # Port exposed by the service
+      targetPort: 3001  # Port inside the container
+  type: ClusterIP
+

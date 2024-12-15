@@ -47,7 +47,7 @@ sudo sysctl --system
 
 ###Set Host machine name
 sudo hostnamectl set-hostname master-node #In master-node
-sudo hostnamectl set-hostname worker01 #In worker 1
+sudo hostnamectl set-hostname worker-1 #In worker 1
 sudo hostnamectl set-hostname worker02 #In worker 2
 
 

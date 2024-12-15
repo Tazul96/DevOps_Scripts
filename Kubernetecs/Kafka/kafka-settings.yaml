@@ -1,0 +1,38 @@
+replicas: 2  # Master-slave setup, 1 replicas for Kafka (1 leader, 1 followers)
+
+zookeeper:
+  enabled: true
+  replicas: 2  # Zookeeper cluster set--up for Kafka replication
+
+persistence:
+  enabled: true
+  storageClass: "default" ##It can be standard
+  size: 10Gi 
+
+resources:
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+
+
+kafka:
+  listeners:
+    external:
+      - "PLAINTEXT://0.0.0.0:9092" 
+    internal:
+      - "PLAINTEXT://0.0.0.0:9093"
+  advertisedListeners:
+    - "PLAINTEXT://212.28.184.129:9092"
+  zookeeperConnect: "zookeeper:2181"
+  heapOpts: "-Xms1G -Xmx1G"  # Set the heap options
+  logDir: "/var/lib/kafka/data"  # Set the log directory
+  logRetention:
+    size: "30G"  # Max log size before retention kicks in
+  logRetentionHours: 168  # Retain logs for 7 days (168 hour)
+  evictionPolicy: "all"  # Kafka eviction policy (choose based on your needs)
+  receiveConnections: true  # Allow Kafka to receive cconnections
+
+  

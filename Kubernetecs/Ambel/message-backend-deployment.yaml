@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-backend
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-backend
+  template:
+    metadata:
+      labels:
+        app: message-backend
+    spec:
+      containers:
+        - name: message-backend
+          image: tazul96/ambel:PMB-latest
+          ports:
+            - containerPort: 8001
+      imagePullSecrets:
+        - name: dockerhub-secret    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-backend
+spec:
+  selector:
+    app: message-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8001
+  type: ClusterIP

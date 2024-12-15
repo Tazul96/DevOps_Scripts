@@ -1,0 +1,83 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ambel-ca
+  namespace: production
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "50M"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "true"
+    nginx.ingress.kubernetes.io/websocket-services: "main-backend, message-backend"
+    nginx.ingress.kubernetes.io/connection-proxy: "keep-alive"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - ambel.ca
+      - www.ambel.ca
+      - message.ambel.ca
+      secretName: ambel.ca-tls
+  rules:
+  - host: ambel.ca
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: main-frontend
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/api"
+        backend:
+          service:
+            name: main-backend
+            port:
+              number: 80
+      - pathType: Exact
+        path: "/socket.io"
+        backend:
+          service:
+            name: main-backend
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/userdata-extractor"
+        backend:
+          service:
+            name: main-backend
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/api/messageID-extractor"
+        backend:
+          service:
+            name: main-backend
+            port:
+              number: 80
+
+  - host: message.ambel.ca
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: message-frontend
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/messages/api"
+        backend:
+          service:
+            name: message-backend
+            port:
+              number: 80
+      - pathType: Exact
+        path: "/socket.io"
+        backend:
+          service:
+            name: message-backend
+            port:
+              number: 80

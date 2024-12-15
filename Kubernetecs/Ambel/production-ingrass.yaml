@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ambel-ingress
+  namespace: production
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-ambel
+    nginx.ingress.kubernetes.io/whitelist-source-range: 0.0.0.0/0,::/0
+spec:
+  tls:
+  - hosts:
+      - ambel.ca
+    secretName: ambel-ca-tls  # SSL certificate secret for ambel.ca
+  - hosts:
+      - message.ambel.ca
+    secretName: ambel-ca-tls  # SSL certificate secret for message.ambel.ca (same as ambel.ca)
+  rules:
+  - host: ambel.ca
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: main-frontend
+            port:
+              number: 3000
+    
+  - host: message.ambel.ca
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: message-frontend
+            port:
+              number: 3001
+    

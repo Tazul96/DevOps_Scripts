@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper
+  namespace: kafka
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: bitnami/zookeeper:latest
+        ports:
+        - containerPort: 2181
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: logs
+          mountPath: /data-log
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: zookeeper-data
+      - name: logs
+        persistentVolumeClaim:
+          claimName: zookeeper-logs

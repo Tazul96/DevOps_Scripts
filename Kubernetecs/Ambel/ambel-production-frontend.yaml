@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-frontend
+  namespace: production
+  labels:
+    app: main-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-frontend
+  template:
+    metadata:
+      labels:
+        app: main-frontend
+    spec:
+      containers:
+      - name: main-frontend
+        image: tazul96/ambel:PF-latest
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-frontend
+  namespace: production
+  labels:
+    app: message-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-frontend
+  template:
+    metadata:
+      labels:
+        app: message-frontend
+    spec:
+      containers:
+      - name: message-frontend
+        image: tazul96/ambel:PMF-latest
+        ports:
+        - containerPort: 3001
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-frontend
+  namespace: production
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: main-frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-frontend
+  namespace: production
+spec:
+  ports:
+  - port: 80
+    targetPort: 3001
+  selector:
+    app: message-frontend

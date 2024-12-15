@@ -1,0 +1,24 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 147.93.132.49/32
+  - 212.28.184.129-212.28.184.130 #specific IP or  ranges
+
+
+---
+
+# or
+
+# kubectl -n metallb-system edit configmap config
+
+# address-pools:
+# - name: default
+#   protocol: layer2
+#   addresses:
+#   - 147.93.132.49/32
+#   - 147.93.132.50-147.93.132.59
+#   - 127.0.0.0/16 #If you work on local machines

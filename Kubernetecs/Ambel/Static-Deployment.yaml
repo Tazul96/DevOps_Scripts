@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static-frontend
+  namespace: test # Change to 'production' for production environment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: static-frontend
+  template:
+    metadata:
+      labels:
+        app: static-frontend
+    spec:
+      containers:
+        - name: static-frontend
+          image: tazul96/ambel:TSF-latest
+          ports:
+            - containerPort: 3002
+      imagePullSecrets:
+        - name: dockerhub-secret

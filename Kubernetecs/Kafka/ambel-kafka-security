@@ -1,0 +1,20 @@
+mkdir -p /tmp/kafka-ssl
+cd /tmp/kafka-ssl
+
+# Generate CA key and certificate
+openssl genpkey -algorithm RSA -out ca.key
+openssl req -x509 -key ca.key -out ca.crt -subj "/CN=kafka-ca"
+
+# Generate Kafka server key and certificate
+openssl genpkey -algorithm RSA -out kafka.key
+openssl req -new -key kafka.key -out kafka.csr -subj "/CN=kafka-server"
+openssl x509 -req -in kafka.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kafka.crt
+
+# Create Kafka client key and certificate
+openssl genpkey -algorithm RSA -out client.key
+openssl req -new -key client.key -out client.csr -subj "/CN=kafka-client"
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt
+
+
+kubectl create secret tls kafka-ssl-certificates --cert=kafka.crt --key=kafka.key --namespace=kafka
+kubectl create secret generic kafka-ca-cert --from-file=ca.crt --namespace=kafka

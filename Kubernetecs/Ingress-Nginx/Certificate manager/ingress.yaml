@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-frontend
+  annotations:
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - ambel.ca
+      - www.ambel.ca
+      secretName: ambel.ca-tls 
+  rules:
+  - host: ambel.ca
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: main-frontend
+            port:
+              number: 80

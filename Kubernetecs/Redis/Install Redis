@@ -1,0 +1,47 @@
+Identify the volume and create a partition there. or can be partition by exiting partion. I did no exiting partition. because there is little risk after install some files there. To see the partition type, 
+
+lsblk
+
+
+
+sudo fdisk /dev/sda
+
+
+Format the partition
+sudo mkfs.ext4 /dev/sda4
+
+
+Mount the volume
+sudo mkdir /mnt/data
+sudo mount /dev/sda4 /mnt/data
+
+Configure auto maount on boot
+sudo nano /etc/fstab
+
+Past the line
+/dev/sda4   /mnt/data   ext4    defaults    0   2
+
+sudo mount -a
+
+
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+
+helm install redis bitnami/redis \
+  --set architecture=replication \
+  --set auth.enabled=false \
+  --set replicaCount=2 \
+  --set master.resources.requests.memory="256Mi" \
+  --set master.resources.requests.cpu="250m" \
+  --set master.resources.limits.memory="512Mi" \
+  --set master.resources.limits.cpu="500m" \
+  --set slave.resources.requests.memory="256Mi" \
+  --set slave.resources.requests.cpu="250m" \
+  --set slave.resources.limits.memory="512Mi" \
+  --set slave.resources.limits.cpu="500m" \
+  --set persistence.enabled=true \
+  --set persistence.size=10Gi \
+  --set persistence.storageClass="manual" \
+  --set master.configuration="appendonly yes"

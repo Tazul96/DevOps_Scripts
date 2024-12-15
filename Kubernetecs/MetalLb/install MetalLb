@@ -1,0 +1,11 @@
+check the before insatll
+
+kubectl edit configmap -n kube-system kube-proxy
+mode: "ipvs"
+ipvs:
+  strictARP: true
+
+Install the metallb
+
+helm repo add metallb https://metallb.github.io/metallb
+helm install metallb metallb/metallb --create-namespace --namespace metallb

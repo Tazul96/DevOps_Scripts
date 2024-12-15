@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ambel.ca
+  namespace: default
+spec:
+  secretName: ambel.ca-tls
+  issuerRef:
+    name: letsencrypt-ambel
+    kind: ClusterIssuer
+  commonName: ambel.ca
+  dnsNames:
+  - ambel.ca
+  - www.ambel.ca
+  - test.ambel.ca
+  - www.test.ambel.ca
+  - message.ambel.ca
+  - test.message.ambel.ca

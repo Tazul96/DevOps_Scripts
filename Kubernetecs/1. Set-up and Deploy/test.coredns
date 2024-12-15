@@ -1,0 +1,24 @@
+To modify the configuration:
+
+Edit the CoreDNS ConfigMap: Run the following to edit the Corefile in the kube-system namespace:
+
+bash
+Copy code
+kubectl edit configmap coredns -n kube-system
+Update the Corefile: In the Corefile, change the forward . /etc/resolv.conf line to directly forward to a public DNS server (such as 8.8.8.8 or 1.1.1.1).
+
+Change this:
+
+yaml
+Copy code
+forward . /etc/resolv.conf {
+    max_concurrent 1000
+}
+To this:
+
+yaml
+Copy code
+forward . 8.8.8.8 {
+    max_concurrent 1000
+}
+This change tells CoreDNS to forward DNS requests to Google's DNS server (8.8.8.8), bypassing the system-level DNS resolver.

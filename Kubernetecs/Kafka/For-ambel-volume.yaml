@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zookeeper-data-pv
+  namespace: kafka
+  labels:
+    type: zookeeper-storage
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/zookeeper
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zookeeper-logs-pv
+  namespace: kafka
+  labels:
+    type: zookeeper-logs-storage
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/zookeeper-logs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-logs-pv
+  namespace: kafka
+  labels:
+    type: kafka-storage
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/kafka
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-logs
+  namespace: kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+  selector:
+    matchLabels:
+      type: kafka-storage
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zookeeper-data
+  namespace: kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    matchLabels:
+      type: zookeeper-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zookeeper-logs
+  namespace: kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    matchLabels:
+      type: zookeeper-logs-storage

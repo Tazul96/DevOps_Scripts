@@ -1,0 +1,6 @@
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+
+#Create a settings file first and then apply the settings.
+
+helm install kafka bitnami/kafka -f kafa-settings.yaml
