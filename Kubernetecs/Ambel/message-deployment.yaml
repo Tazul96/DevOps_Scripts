@@ -16,6 +16,7 @@ spec:
       containers:
         - name: message-frontend
           image: tazul96/ambel:PMF-latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3001
       imagePullSecrets:

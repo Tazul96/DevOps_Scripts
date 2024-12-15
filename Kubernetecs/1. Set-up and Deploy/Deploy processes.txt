@@ -215,3 +215,7 @@ https://Node-IP:30001.
 		
 		
 kubectl get pods -n metallb-system
+
+
+See all images in the cluster
+kubectl get pods --all-namespaces -o=jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n'

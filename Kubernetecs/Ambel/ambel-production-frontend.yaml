@@ -18,6 +18,7 @@ spec:
       containers:
       - name: main-frontend
         image: tazul96/ambel:PF-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
       imagePullSecrets:
@@ -43,6 +44,7 @@ spec:
       containers:
       - name: message-frontend
         image: tazul96/ambel:PMF-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3001
       imagePullSecrets:

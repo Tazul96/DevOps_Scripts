@@ -16,6 +16,7 @@ spec:
       containers:
         - name: main-backend
           image: tazul96/ambel:MB-latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
       imagePullSecrets:

@@ -18,6 +18,7 @@ spec:
       containers:
       - name: main-backend
         image: tazul96/ambel:PB-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
       imagePullSecrets:
@@ -43,6 +44,7 @@ spec:
       containers:
       - name: message-backend
         image: tazul96/ambel:PMB-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8001
       imagePullSecrets:

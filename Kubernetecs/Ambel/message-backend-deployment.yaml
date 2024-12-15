@@ -16,6 +16,7 @@ spec:
       containers:
         - name: message-backend
           image: tazul96/ambel:PMB-latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8001
       imagePullSecrets:
