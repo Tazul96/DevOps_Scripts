@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-backend-service
+  namespace: test
+  labels:
+    app: dashboard-backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-backend-service
+  template:
+    metadata:
+      labels:
+        app: dashboard-backend-service
+    spec:
+      containers:
+      - name: dashboard-backend-service
+        image: tazul96/ambel:Pro-dashboard-B-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8003
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-backend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 8003
+  selector:
+    app: dashboard-backend-service
+  type: ClusterIP

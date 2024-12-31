@@ -1,0 +1,17 @@
+openssl genpkey -algorithm RSA -out postgresql.key -aes256
+
+openssl req -new -x509 -sha256 -key postgresql.key -out postgresql.crt -days 365
+
+openssl req -new -x509 -key postgresql.key -out ca.crt -days 365
+
+cat postgresql.key postgresql.crt > postgresql.pem
+
+
+sudo mv postgresql.pem /etc/ssl/certs/
+sudo mv ca.crt /etc/ssl/certs/
+
+
+kubectl create secret generic postgresql-ssl-secret \
+  --from-file=postgresql.pem=/etc/ssl/certs/postgresql.pem \
+  --from-file=ca.crt=/etc/ssl/certs/ca.crt \
+  --namespace=db

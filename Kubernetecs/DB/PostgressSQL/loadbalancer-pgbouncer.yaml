@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgbouncer
+  namespace: db
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pgbouncer
+  template:
+    metadata:
+      labels:
+        app: pgbouncer
+    spec:
+      containers:
+      - name: pgbouncer
+        image: edoburu/pgbouncer:1.18
+        ports:
+        - containerPort: 6432
+        env:
+        - name: DB_HOST
+          value: "postgres.db.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "replicator"
+        - name: DB_PASSWORD
+          value: "StrongPassword123!"
+        - name: DB_DATABASE
+          value: "production"
+        volumeMounts:
+        - name: pgbouncer-config
+          mountPath: /etc/pgbouncer
+  volumes:
+  - name: pgbouncer-config
+    configMap:
+      name: pgbouncer-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgbouncer-config
+  namespace: db
+data:
+  pgbouncer.ini: |
+    [databases]
+    production = host=postgres.db.svc.cluster.local port=5432 dbname=production
+
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 6432
+    auth_type = md5
+    auth_file = /etc/pgbouncer/userlist.txt
+  userlist.txt: |
+    "replicator" "md5<hashed-password>"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgbouncer
+  namespace: db
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 6432
+    targetPort: 6432
+  selector:
+    app: pgbouncer
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-access-policy
+  namespace: db
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: backend
+    ports:
+    - protocol: TCP
+      port: 5432
+

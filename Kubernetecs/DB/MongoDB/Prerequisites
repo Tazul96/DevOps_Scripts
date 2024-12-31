@@ -1,0 +1,6 @@
+kubectl create namespace db
+
+
+kubectl -n db create secret generic mongodb-secret \
+  --from-literal=username=admin \
+  --from-literal=password=securepassword

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-frontend-service
+  namespace: test
+  labels:
+    app: message-frontend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-frontend-service
+  template:
+    metadata:
+      labels:
+        app: message-frontend-service
+    spec:
+      containers:
+      - name: message-frontend-service
+        image: tazul96/ambel:Pro-message-F-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3002
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-frontend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 3002
+  selector:
+    app: message-frontend-service
+  type: ClusterIP

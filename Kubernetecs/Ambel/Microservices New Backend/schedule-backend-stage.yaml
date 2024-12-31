@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: schedule-backend-service
+  namespace: test
+  labels:
+    app: schedule-backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedule-backend-service
+  template:
+    metadata:
+      labels:
+        app: schedule-backend-service
+    spec:
+      containers:
+      - name: schedule-backend-service
+        image: tazul96/ambel:Pro-schedule-B-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8004
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: schedule-backend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 8004
+  selector:
+    app: schedule-backend-service
+  type: ClusterIP

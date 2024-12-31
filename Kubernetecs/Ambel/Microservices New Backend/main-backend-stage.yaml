@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-backend-service
+  namespace: test
+  labels:
+    app: main-backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-backend-service
+  template:
+    metadata:
+      labels:
+        app: main-backend-service
+    spec:
+      containers:
+      - name: main-backend-service
+        image: tazul96/ambel:Pro-main-B-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-backend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: main-backend-service
+  type: ClusterIP

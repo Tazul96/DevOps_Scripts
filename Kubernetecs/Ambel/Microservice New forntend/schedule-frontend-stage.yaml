@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: schedule-frontend-service
+  namespace: test
+  labels:
+    app: schedule-frontend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedule-frontend-service
+  template:
+    metadata:
+      labels:
+        app: schedule-frontend-service
+    spec:
+      containers:
+      - name: schedule-frontend-service
+        image: tazul96/ambel:Pro-schedule-F-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3004
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: schedule-frontend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 3004
+  selector:
+    app: schedule-frontend-service
+  type: ClusterIP

@@ -1,0 +1,16 @@
+openssl genpkey -algorithm RSA -out mongodb.key -aes256
+
+openssl req -new -x509 -sha256 -key mongodb.key -out mongodb.crt -days 365
+
+openssl req -new -x509 -key mongodb.key -out ca.crt -days 365
+
+cat mongodb.key mongodb.crt > mongodb.pem
+
+sudo mv mongodb.pem /etc/ssl/certs/
+sudo mv ca.crt /etc/ssl/certs/
+
+
+kubectl create secret generic mongodb-ssl-secret \
+  --from-file=mongodb.pem=/etc/ssl/certs/mongodb.pem \
+  --from-file=ca.crt=/etc/ssl/certs/ca.crt \
+  --namespace=db

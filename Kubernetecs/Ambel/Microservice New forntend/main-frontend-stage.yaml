@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-frontend-service
+  namespace: test
+  labels:
+    app: main-frontend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-frontend-service
+  template:
+    metadata:
+      labels:
+        app: main-frontend-service
+    spec:
+      containers:
+      - name: main-frontend-service
+        image: tazul96/ambel:Pro-main-F-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-frontend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: main-frontend-service
+  type: ClusterIP

@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ambel.co
+  namespace: default
+spec:
+  secretName: ambel.co-tls
+  issuerRef:
+    name: letsencrypt-ambel-co
+    kind: ClusterIssuer
+  commonName: ambel.co
+  dnsNames:
+  - ambel.co
+  - www.ambel.co
+  - message.ambel.co
+  - schedule.ambel.co
+  - payment.ambel.co
+  - dashboard.ambel.co
+  - booking.ambel.co
+  - shop.ambel.co
+  - settings.ambel.co
+  - main.ambel.co

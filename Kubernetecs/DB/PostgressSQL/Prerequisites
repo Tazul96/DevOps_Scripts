@@ -1,0 +1,6 @@
+kubectl create namespace db
+
+
+kubectl -n db create secret generic postgres-secret \
+  --from-literal=username=postgres \
+  --from-literal=password=securepassword

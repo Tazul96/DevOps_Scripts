@@ -1,0 +1,150 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ambel-co
+  namespace: test
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-ambel-co
+    nginx.ingress.kubernetes.io/proxy-body-size: "50M"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "true"
+    nginx.ingress.kubernetes.io/websocket-services: "main-backend-service, message-backend"
+    nginx.ingress.kubernetes.io/connection-proxy: "keep-alive"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - ambel.co
+      - www.ambel.co
+      - message.ambel.co
+      - schedule.ambel.co
+      - payment.ambel.co
+      - dashboard.ambel.co
+      - booking.ambel.co
+      secretName: ambel.co-tls
+  rules:
+  - host: ambel.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: static-frontend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/api"
+        backend:
+          service:
+            name: main-backend-service
+            port:
+              number: 80
+      - pathType: Exact
+        path: "/socket.io"
+        backend:
+          service:
+            name: main-backend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/userdata-extractor"
+        backend:
+          service:
+            name: main-backend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/api/messageID-extractor"
+        backend:
+          service:
+            name: main-backend-service
+            port:
+              number: 80
+
+  - host: message.ambel.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: message-frontend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/messages/api"
+        backend:
+          service:
+            name: message-backend-service
+            port:
+              number: 80
+      - pathType: Exact
+        path: "/socket.io"
+        backend:
+          service:
+            name: message-backend-service
+            port:
+              number: 80
+  - host: dashboard.ambel.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: dashboard-frontend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/dashboard/api/v1"
+        backend:
+          service:
+            name: dashboard-backend-service
+            port:
+              number: 80
+      
+  - host: schedule.ambel.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: schedule-frontend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/schedule/api/v1"
+        backend:
+          service:
+            name: schedule-backend-service
+            port:
+              number: 80
+
+  - host: payment.ambel.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/payment/api/v1"
+        backend:
+          service:
+            name: payment-backend-service
+            port:
+              number: 80
+  - host: booking.ambel.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: booking-frontend-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/booking/api/v1"
+        backend:
+          service:
+            name: booking-backend-service
+            port:
+              number: 80

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-backend-service
+  namespace: test
+  labels:
+    app: payment-backend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-backend-service
+  template:
+    metadata:
+      labels:
+        app: payment-backend-service
+    spec:
+      containers:
+      - name: payment-backend-service
+        image: tazul96/ambel:Pro-payment-B-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8005
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-backend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 8005
+  selector:
+    app: payment-backend-service
+  type: ClusterIP
