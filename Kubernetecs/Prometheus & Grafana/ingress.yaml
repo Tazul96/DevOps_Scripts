@@ -1,0 +1,28 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ambel-monitoring
+  namespace: monitoring
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-grafana
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - monitoring.ambel.co
+        - www.monitoring.ambel.co
+      secretName: ambel.co-grafana-tls
+  rules:
+    - host: monitoring.ambel.co
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: prometheus-grafana
+                port:
+                  number: 80
