@@ -1,0 +1,187 @@
+---
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: mongodbcommunity.mongodb.com/v1
+    kind: MongoDBCommunity
+    metadata:
+      name: mongodb
+    spec:
+      members: 3
+      type: ReplicaSet
+      version: "8.0.0"
+      security:
+        authentication:
+          modes: ["SCRAM"]
+        tls:
+          enabled: true
+          certificateKeySecretRef:
+            name: mongodb-tls
+          caConfigMapRef:
+            name: ca-config-map
+      users:
+        - name: my-user
+          db: admin
+          passwordSecretRef:
+            name: my-user-password
+          roles:
+            - name: clusterAdmin
+              db: admin
+            - name: userAdminAnyDatabase
+              db: admin
+          scramCredentialsSecretName: my-scram
+      additionalMongodConfig:
+        storage.wiredTiger.engineConfig.journalCompressor: zlib
+      statefulSet:
+        spec:
+          serviceName: example-mongodb-svc
+          selector:
+            matchLabels:
+              app.kubernetes.io/name: mongodb
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/name: mongodb
+            spec:
+              affinity:
+                podAntiAffinity:
+                  preferredDuringSchedulingIgnoredDuringExecution:
+                    - weight: 100
+                      podAffinityTerm:
+                        labelSelector:
+                          matchExpressions:
+                            - key: app.kubernetes.io/name
+                              operator: In
+                              values:
+                                - mongodb
+                        topologyKey: kubernetes.io/hostname
+              initContainers:
+                - name: change-dir-permissions
+                  image: busybox
+                  command:
+                    - chown
+                    - -R
+                    - "2000"
+                    - /data
+                  volumeMounts:
+                    - mountPath: /data
+                      name: data-volume
+                  securityContext:
+                    runAsUser: 0
+                    runAsGroup: 0
+                    runAsNonRoot: false
+              volumes:
+                - name: data-volume
+                  hostPath:
+                    path: /mnt/data/mongo-data
+                    type: DirectoryOrCreate
+                - name: logs-volume
+                  hostPath:
+                    path: /mnt/data/mongo-logs
+                    type: DirectoryOrCreate
+      prometheus:
+        username: ambel-admin
+        passwordSecretRef:
+          name: prometheus-src-admin
+        port: 9216
+
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: my-user-password
+    type: Opaque
+    stringData:
+      password: twinkle
+
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mongodb-tls
+    type: kubernetes.io/tls
+    data:
+      tls.crt: dibo nah sala
+      tls.key: dibo nah sala
+
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ca-config-map
+    data:
+      ca.crt: |
+        -----BEGIN CERTIFICATE-----
+        abcd provide outside-system
+        -----END CERTIFICATE-----
+
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: metrics-endpoint-password
+    type: Opaque
+    stringData:
+      password: <your-metrics-endpoint-password>
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: mongodb-internal
+    spec:
+      ports:
+        - port: 27017
+          targetPort: 27017
+      selector:
+        app.kubernetes.io/name: mongodb
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: mongodb-external
+    spec:
+      type: NodePort
+      ports:
+        - port: 27017
+          nodePort: 31181
+          targetPort: 27017
+      selector:
+        app.kubernetes.io/name: mongodb
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: mongo-service-0
+    spec:
+      type: NodePort
+      selector:
+        app: mongodb
+        statefulset.kubernetes.io/pod-name: mongodb-0
+      ports:
+        - nodePort: 31182
+          port: 27017
+          targetPort: 27017
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: mongo-service-1
+    spec:
+      type: NodePort
+      selector:
+        app: mongodb
+        statefulset.kubernetes.io/pod-name: mongodb-1
+      ports:
+        - nodePort: 31183
+          port: 27017
+          targetPort: 27017
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: mongo-service-2
+    spec:
+      type: NodePort
+      selector:
+        app: mongodb
+        statefulset.kubernetes.io/pod-name: mongodb-2
+      ports:
+        - nodePort: 31184
+          port: 27017
+          targetPort: 27017

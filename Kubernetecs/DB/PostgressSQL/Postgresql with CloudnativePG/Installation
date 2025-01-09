@@ -1,0 +1,80 @@
+---Step 1---
+
+helm repo add cnpg https://cloudnative-pg.github.io/charts
+helm repo update
+helm install cloudnative-pg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace
+
+Or
+
+kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/main/releases/latest/install.yaml
+
+Or
+
+specific version
+
+kubectl apply -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.21/releases/cnpg-1.21.0.yaml
+
+
+kubectl create secret generic postgres-credentials \
+  --from-literal=PGUSER=ambel...pg \
+  --from-literal=PGPASSWORD=ambel...pass25 \
+  --namespace=postgres
+
+---Step 2---
+
+Create S3 stroage, folder and I am user with access ploicy
+kubectl apply -f aws-postgresql-backup-creds.yaml
+
+---Step 3---
+
+kubectl apply -f file-system.yaml
+kubectl apply -f persistant-volume.yaml
+
+
+---Step 4---
+
+kubectl apply -f postgres-operator-cluster.yaml
+
+If get any permission or directory create related issues
+
+1. SSH into the nodes and create the folder and give the permissions
+
+sudo mkdir -p /mnt/data/postgresql-0
+sudo chown -R 1001:1001 /mnt/data/postgresql-0
+
+
+sudo mkdir -p /mnt/data/postgresql-1
+sudo chown -R 1001:1001 /mnt/data/postgresql-1
+
+sudo mkdir -p /mnt/data/postgresql-2
+sudo chown -R 1001:1001 /mnt/data/postgresql-2
+
+---Step 5---
+
+expose to outside of the cluster through nginx
+
+kubectl apply -f expose-external-nginx.yaml
+
+edit the existing conf and add this line
+
+kubectl edit deploy ingress-nginx-controller -n ingress-nginx
+- --tcp-services-configmap=ingress-nginx/tcp-services
+
+check connection
+nc -zv <external-ip> 5432
+
+---Step 6---
+Get the credential and connect the database.
+
+kubectl get secret postgres-cluster-app -n postgres -o jsonpath="{.data.username}" | base64 --decode
+kubectl get secret postgres-cluster-app -n postgres -o jsonpath="{.data.password}" | base64 --decode
+
+
+kubectl get secret postgres-cluster-superuser -n postgres -o jsonpath="{.data.username}" | base64 --decode
+kubectl get secret postgres-cluster-superuser -n postgres -o jsonpath="{.data.password}" | base64 --decode
+
+postgres://<username>:<password>@<host>:<port>/<database>
+postgres://app:<app-password>@postgres-cluster-rw.postgres.svc.cluster.local:5432/<database>
+postgres://app:<app-password>@<external-ip>:5432/<database>
+postgres://app:<app-password>@postgres.example.com:5432/<database>
+

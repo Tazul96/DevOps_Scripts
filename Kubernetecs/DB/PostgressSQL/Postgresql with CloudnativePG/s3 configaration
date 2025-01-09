@@ -1,0 +1,31 @@
+To make time to time backup from your database to S3 storage you need to follow the steps below
+
+1. create a bucket and folder within your preferred location or nearest to your location
+2. create a I am user with s3 policy
+3. Creat access amd Download or store the credential
+
+##Policy
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::ambel-backup",
+                "arn:aws:s3:::ambel-backup/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestedRegion": "us-east-2"
+                }
+            }
+        }
+    ]
+}

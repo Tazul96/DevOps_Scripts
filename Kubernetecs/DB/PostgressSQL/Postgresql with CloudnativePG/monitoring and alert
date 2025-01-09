@@ -1,0 +1,9 @@
+🚨 What Other Alerts Should You Add?
+
+You can enhance your PrometheusRule by adding more alerts. Here are some suggestions for a production-grade PostgreSQL cluster:
+Alert Name	Expression	Severity	Description
+PostgreSQLDown	pg_up == 0	Critical	Triggers if the PostgreSQL server goes down.
+PostgreSQLDiskUsageHigh	pg_database_size_bytes > 90 * 1024 * 1024 * 1024	Warning	Triggers if the database size exceeds 90 GB.
+PostgreSQLSlowQueries	pg_stat_activity_duration > 5000	Warning	Triggers if queries take longer than 5 seconds.
+PostgreSQLHighCPUUsage	container_cpu_usage_seconds_total > 80	Warning	Triggers if CPU usage exceeds 80%.
+PostgreSQLMemoryUsageHigh	container_memory_usage_bytes > 80 * 1024 * 1024 * 1024	Warning	Triggers if memory usage exceeds 80 GB.

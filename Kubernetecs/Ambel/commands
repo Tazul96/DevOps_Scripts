@@ -6,9 +6,10 @@ kubectl delete -f main-frontend-test-co.yaml
 
 
 kubectl delete -f dashboard-frontend-test-co.yaml
-kubectl delete -f message-frontend-test-co.yaml
 kubectl delete -f schedule-frontend-test-co.yaml
 kubectl delete -f static-frontend-test.ambel.co.yaml
+kubectl delete -f booking-frontend-test-co.yaml
+kubectl delete -f message-frontend-test-co.yaml
 
 
 
@@ -17,11 +18,13 @@ kubectl apply -f schedule-backend-test-co.yaml
 kubectl apply -f dashboard-backend-test-co.yaml
 kubectl apply -f message-backend-test-co.yaml
 
+kubectl apply -f static-frontend-test.ambel.co.yaml
 kubectl apply -f dashboard-frontend-test-co.yaml
+kubectl apply -f schedule-frontend-test-co.yaml
+kubectl apply -f booking-frontend-test-co.yaml
 kubectl apply -f main-frontend-test-co.yaml
 kubectl apply -f message-frontend-test-co.yaml
-kubectl apply -f schedule-frontend-test-co.yaml
-kubectl apply -f static-frontend-test.ambel.co.yaml
+
 
 
 kubectl get pods -n test
