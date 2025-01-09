@@ -24,7 +24,22 @@ spec:
       work_mem: "2621kB"
       min_wal_size: "1GB"
       max_wal_size: "2GB"
+      max_wal_senders: "3"
+      max_replication_slots: "3"
+      wal_level: "logical"
 
+  replicationSlots:
+    highAvailability:
+      enabled: true
+      
+  bootstrap:
+    recovery:
+      source: postgres-cluster
+
+  primaryUpdateStrategy: unsupervised
+  synchronousReplication:
+    enabled: true
+    
   affinity:
     enablePodAntiAffinity: true
     topologyKey: kubernetes.io/hostname

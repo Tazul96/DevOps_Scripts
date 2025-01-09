@@ -78,3 +78,10 @@ postgres://app:<app-password>@postgres-cluster-rw.postgres.svc.cluster.local:543
 postgres://app:<app-password>@<external-ip>:5432/<database>
 postgres://app:<app-password>@postgres.example.com:5432/<database>
 
+
+
+Rolling update
+kubectl patch cluster postgres-cluster --type merge \
+  -p '{"spec":{"postgresql":{"parameters":{"max_connections":"200"}}}}'
+
+
