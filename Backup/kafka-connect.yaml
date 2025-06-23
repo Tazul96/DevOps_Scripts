@@ -1,0 +1,24 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: kafka-connect
+  namespace: kafka
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.9.0
+  replicas: 1
+  image: tazul96/kafka-connect-custom:latest
+  bootstrapServers: kafka-kafka-bootstrap:9092
+  config:
+    rest.advertised.host.name: "0.0.0.0"
+    group.id: connect-cluster
+    config.storage.replication.factor: 1
+    offset.storage.replication.factor: 1
+    status.storage.replication.factor: 1
+    security.protocol: PLAINTEXT
+  readinessProbe:
+    initialDelaySeconds: 120
+    timeoutSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 120

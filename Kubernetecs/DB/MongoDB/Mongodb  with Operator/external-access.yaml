@@ -1,0 +1,69 @@
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: mongodb-internal
+#   namespace: mongodb
+#   annotations:
+#     kube-linter.io/ignore-all: "used for sample"
+# spec:
+#   clusterIP: None
+#   selector:
+#     app: mongodb-svc
+#     statefulset.kubernetes.io/pod-name: mongodb-0
+#   ports:
+#     - name: mongodb
+#       protocol: TCP
+#       port: 27017
+#       targetPort: 27017
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-internal
+  namespace: mongodb
+spec:
+  selector:
+    app.kubernetes.io/name: mongodb
+  ports:
+    - name: mongodb
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+  clusterIP: None
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mongodb-external-0
+  namespace: mongodb
+  annotations:
+    kube-linter.io/ignore-all: "access primary db"
+spec:
+  type: ClusterIP
+  selector:
+    app: mongodb-svc
+    statefulset.kubernetes.io/pod-name: mongodb-0
+  ports:  
+    - name: mongodb
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mongodb-external-1
+  namespace: mongodb
+  annotations:
+    kube-linter.io/ignore-all: "access replica set"
+spec:
+  type: ClusterIP
+  selector:
+    app: mongodb-svc
+    statefulset.kubernetes.io/pod-name: mongodb-1
+  ports:  
+    - name: mongodb
+      protocol: TCP
+      port: 27017
+      targetPort: 27017

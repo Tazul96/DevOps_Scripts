@@ -1,0 +1,161 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-source
+  namespace: kafka
+spec:
+  class: com.mongodb.kafka.connect.MongoSourceConnector
+  tasksMax: 1
+  config:
+    connection.uri: ${secret:mongodb-creds:uri}
+    topic.prefix: ambel-sync
+    database: production
+    collection: events
+    pipeline: |
+      [ { "$match": { "operationType": { "$in": ["insert", "update", "delete"] } } } ]
+    copy.existing: true  # Initial sync
+    batch.size: 1000
+    max.num.batches: 10
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-source
+  namespace: kafka
+spec:
+  class: com.mongodb.kafka.connect.MongoSourceConnector
+  tasksMax: 1
+  config:
+    connection.uri: ${secret:mongodb-creds:uri}
+    topic.prefix: ambel-sync
+    database.include.list: dashboard
+    collection.include.list: users, organizations, practitioners, branches
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+    publish.full.document.only: true
+    pipeline: |
+      [
+        { "$match": { "operationType": { "$in": ["insert", "update", "delete"] } } }
+      ]
+
+    # For the initial snapshot
+    copy.existing: true
+    batch.size: 100
+    max.num.batches: 3
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-source
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSourceConnector
+  tasksMax: 1
+  config:
+    connection.uri: "mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/dashboard?replicaSet=mongodb&authSource=admin"
+    topic.prefix: ambel-sync
+    database.include.list: dashboard
+    collection.include.list: users, organizations, practitioners, branches
+    output.format.key: json
+    output.format.value: json
+    output.json.formatter: com.mongodb.kafka.connect.source.json.formatter.SimplifiedJson
+    key.converter.schemas.enable: false
+    value.converter.schemas.enable: false
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: org.apache.kafka.connect.storage.StringConverter
+    publish.full.document.only: true
+    change.stream.document.key.as.key: false
+    pipeline: |
+      [ { "$match": { "operationType": { "$in": ["insert", "update"] } } } ]
+    #copy.existing: true
+    batch.size: 100
+    max.num.batches: 3
+---
+
+#last final yaml
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-source-user
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSourceConnector
+  tasksMax: 1
+  config:
+    connection.uri: "mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/dashboard?replicaSet=mongodb&authSource=admin"
+    topic.prefix: ambel-sync
+    database.include.list: dashboard
+    collection.include.list: users,organizations,practitioners,branches,invitedpractitioners
+
+    output.format.value: schema
+    output.format.key: schema
+    output.schema.infer.value: true
+    key.converter.schemas.enable: true
+    value.converter.schemas.enable: true
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+
+    output.json.formatter: com.mongodb.kafka.connect.source.json.formatter.SimplifiedJson
+    publish.full.document.only: true
+    pipeline: |
+      [
+        {
+          "$match": {
+            "operationType": { "$in": ["insert", "update", "delete"] }
+          }
+        }
+      ]
+    copy.existing: true
+    batch.size: 100
+    max.num.batches: 3
+
+---
+#final subscription
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-source
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSourceConnector
+  tasksMax: 1
+  config:
+    connection.uri: "mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/dashboard?replicaSet=mongodb&authSource=admin"
+    topic.prefix: ambel-sync
+    database: dashboard
+    collection: subscriptions
+
+    #output.format.value: bson
+    # Publish the full document changes only
+    publish.full.document.only: true
+
+    # Use JSON converters with schemas enabled so the output is structured
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: true
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: true
+
+    pipeline: |
+      [
+        { "$match": { "operationType": { "$in": ["insert", "update", "delete"] } } }
+      ]
+
+    # For the initial snapshot
+    #copy.existing: true
+    batch.size: 100
+    max.num.batches: 3
+
+

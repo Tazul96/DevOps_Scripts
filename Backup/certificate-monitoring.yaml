@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ambel-co-grafana
+  namespace: monitoring
+spec:
+  secretName: ambel.co-grafana-tls
+  issuerRef:
+    name: letsencrypt-grafana
+    kind: ClusterIssuer
+  commonName: monitoring.ambel.co
+  dnsNames:
+  - monitoring.ambel.co
+  - www.monitoring.ambel.co

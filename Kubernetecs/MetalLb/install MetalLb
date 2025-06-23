@@ -9,3 +9,7 @@ Install the metallb
 
 helm repo add metallb https://metallb.github.io/metallb
 helm install metallb metallb/metallb --create-namespace --namespace metallb
+
+helm uninstall metallb --namespace metallb-system
+
+helm install metallb metallb/metallb --namespace metallb-system

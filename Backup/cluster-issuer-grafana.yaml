@@ -1,0 +1,13 @@
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-grafana
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ttazulislam96@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-grafana
+    solvers:
+    - http01:
+        ingress:
+          class: nginx

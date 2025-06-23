@@ -1,0 +1,105 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: postgres-sink-connector
+  namespace: kafka
+spec:
+  class: io.confluent.connect.jdbc.JdbcSinkConnector
+  tasksMax: 1
+  config:
+    connection.url: jdbc:postgresql://postgres-service:5432/database
+    connection.user: username
+    connection.password: password
+    topics: mongodb-sync.your_database.your_collection
+    table.name.format: your_collection
+    insert.mode: upsert
+    pk.mode: record_key
+    pk.fields: _id
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: postgres-sink
+  namespace: kafka
+spec:
+  class: io.confluent.connect.jdbc.JdbcSinkConnector
+  tasksMax: 1
+  config:
+    connection.url: ${secret:postgres-creds:url}
+    connection.user: ${secret:postgres-creds:user}
+    connection.password: ${secret:postgres-creds:password}
+    connection.attempts: 3
+    connection.backoff.ms: 10000
+    topics.regex: ambel-sync.dashboard.*
+    table.name.format: ${topic:substringAfterLast(.)}
+    auto.create: true
+    auto.evolve: true
+    insert.mode: upsert
+    pk.mode: record_key
+    pk.fields: _id
+    batch.size: 100
+    max.retries: 10
+    retry.backoff.ms: 5000
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: postgres-sink
+  namespace: kafka
+spec:
+  class: io.confluent.connect.jdbc.JdbcSinkConnector
+  tasksMax: 1
+  config:
+    # Database Connection
+    connection.url: ${secret:postgres-creds:url}
+    connection.user: ${secret:postgres-creds:user}
+    connection.password: ${secret:postgres-creds:password}
+    connection.attempts: 3
+    connection.backoff.ms: 10000
+
+    # Kafka to PostgreSQL Mapping
+    topics.regex: ambel-sync.dashboard.*
+    table.name.format: ${topic:substringAfterLast(.)}
+    auto.create: true
+    auto.evolve: true
+
+    # Upsert Mode for Deduplication
+    insert.mode: upsert
+    pk.mode: record_value
+    pk.fields: _id
+
+    # Data Handling
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+
+    # Transforms: Convert MongoDB _id to UUID
+    transforms: ConvertUUID, ConvertDates, Flatten, ConvertArrays
+    transforms.ConvertUUID.type: org.apache.kafka.connect.transforms.ReplaceField$Value
+    transforms.ConvertUUID.renames: "_id.$oid:_id"  # Extract _id.$oid from MongoDB
+
+    transforms.ConvertUUID.type: org.apache.kafka.connect.transforms.ValueToKey
+    transforms.ConvertUUID.fields: _id
+
+    transforms.ConvertUUID.type: org.apache.kafka.connect.transforms.UuidTransform$Value
+    transforms.ConvertUUID.salt: "a7e6e18a-ff43-11e9-8f0b-362b9e155667"  # Use a consistent namespace UUID
+
+    transforms.ConvertDates.type: org.apache.kafka.connect.transforms.TimestampConverter$Value
+    transforms.ConvertDates.field: "createdAt,updatedAt"
+    transforms.ConvertDates.target.type: Timestamp
+    transforms.ConvertDates.format: "yyyy-MM-dd'T'HH:mm:ss.SSSX"
+
+    transforms.Flatten.type: org.apache.kafka.connect.transforms.Flatten$Value
+    transforms.Flatten.delimiter: "_"
+
+    transforms.ConvertArrays.type: org.apache.kafka.connect.transforms.ReplaceField$Value
+    transforms.ConvertArrays.exclude: "invited_practitioner, invited_staff"
+    
+    # Batch & Retry Settings
+    batch.size: 100
+    max.retries: 10
+    retry.backoff.ms: 5000
+

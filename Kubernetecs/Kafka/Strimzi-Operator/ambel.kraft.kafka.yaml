@@ -1,0 +1,96 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: controller
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: 1
+  roles:
+    - controller
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 10Gi
+        kraftMetadata: shared
+        deleteClaim: false
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: broker
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: 1
+  roles:
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 30Gi
+        kraftMetadata: shared
+        deleteClaim: false
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: kafka
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
+spec:
+  kafka:
+    template:
+      pod:
+        securityContext:
+          fsGroup: 1001
+    version: 3.9.0
+    metadataVersion: 3.9-IV0
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+        configuration:
+          brokers:
+            - broker: 0
+              advertisedHost: kafka-broker-0.kafka-kafka-brokers.kafka.svc
+              advertisedPort: 9092
+      - name: external
+        port: 9094
+        type: ingress  # Expose via Ingress
+        tls: false
+        configuration:
+          external:
+            type: ingress  # Ingress setup for external access
+            annotations:
+              external-dns.alpha.kubernetes.io/hostname: kafka.ambel.co  # External DNS name
+          advertisedHost: kafka.ambel.co
+          advertisedPort: 9094
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: kafka-metrics-config.yml
+    config:
+      auto.create.topics.enable: "true"
+      log.retention.hours: 72
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+      default.replication.factor: 1
+      min.insync.replicas: 1
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

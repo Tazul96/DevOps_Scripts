@@ -12,3 +12,16 @@ kubectl -n nginx-ingress get services
 helm install ingress-nginx ingress-nginx \
 --repo https://kubernetes.github.io/ingress-nginx \
 --namespace ingress-nginx --create-namespace
+
+helm install ingress-nginx ingress-nginx \
+--repo https://kubernetes.github.io/ingress-nginx \
+--namespace ingress-nginx
+
+helm uninstall ingress-nginx -n ingress-nginx
+
+
+kubectl get svc -n ingress-nginx
+
+
+kubectl exec -it <nginx-ingress-pod-name> -n ingress-nginx -- /bin/sh
+cat /etc/nginx/nginx.conf | grep -E "large_client_header_buffers|proxy_buffer_size|proxy_buffers|proxy_busy_buffers_size"

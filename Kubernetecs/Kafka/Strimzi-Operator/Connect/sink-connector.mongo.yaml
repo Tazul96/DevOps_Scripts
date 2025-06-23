@@ -1,0 +1,227 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: target-mongodb-sink-connector
+  namespace: kafka
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://username:password@target-mongodb-service:27017/database
+    topics: mongodb-sync.your_database.your_collection
+    database: your_database
+    collection: your_collection
+    writemodel.strategy: replace
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink
+  namespace: kafka
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: ${secret:mongodb-creds:uri}
+    topics.regex: ambel-sync.dashboard.*
+    database: payment
+    collection: ${topic:substringAfterLast(.)}
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.UpdateOneDefaultStrategy
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.PartialValueStrategy
+    document.id.strategy.partial.value.projection.list: _id
+    document.id.strategy.partial.value.projection.type: AllowList
+    batch.size: 100
+    max.batch.size: 1048576
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/payment?replicaSet=mongodb&authSource=admin
+    topics: ambel-sync.dashboard.users
+    database: payment
+    collection: users
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.ProvidedInValueStrategy
+    document.id.strategy.overwrite.existing: true  # Force the sink to use the source's _id
+
+    # Write Model
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.ReplaceOneDefaultStrategy
+
+    # Converters
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+    key.converter.schemas.enable: false
+
+    # Add this if the source data is nested under "payload"
+    transforms: ExtractPayload
+    transforms.ExtractPayload.type: org.apache.kafka.connect.transforms.ExtractField$Value
+    transforms.ExtractPayload.field: payload
+
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/payment?replicaSet=mongodb&authSource=admin
+    topics: ambel-sync.dashboard.users
+    database: payment
+    collection: users
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.ProvidedInValueStrategy
+    document.id.strategy.overwrite.existing: true  # Force the sink to use the source's _id
+
+    # Write Model
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.ReplaceOneDefaultStrategy
+
+    # Converters
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/payment?replicaSet=mongodb&authSource=admin
+    topics: ambel-sync.dashboard.users
+    database: payment
+    collection: users
+    # Use BsonConverter
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: org.apache.kafka.connect.storage.StringConverter
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.PartialValueStrategy
+    document.id.strategy.partial.value.projection.list: _id
+    document.id.strategy.partial.value.projection.type: AllowList
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.UpdateOneTimestampsStrategy
+    #document.id.strategy.overwrite.existing: true  # Force the sink to use the source's _id
+    key.converter.schemas.enable: false
+    value.converter.schemas.enable: false
+    post.processor.chain: com.mongodb.kafka.connect.sink.processor.BlockListKeyProjector
+    key.projection.type: BlockList
+    key.projection.list: createdAt,updatedAt,__v
+
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/payment?replicaSet=mongodb&authSource=admin
+    topics: ambel-sync.dashboard.users
+    database: payment
+    collection: users
+    # Use BsonConver
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: org.apache.kafka.connect.storage.StringConverter
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.PartialValueStrategy
+    document.id.strategy.partial.value.projection.list: _id
+    document.id.strategy.partial.value.projection.type: AllowList
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.ReplaceOneBusinessKeyStrategy
+    document.id.strategy.overwrite.existing: true  # Force the sink to use the source's _id
+    #key.converter.schemas.enable: false
+    #value.converter.schemas.enable: false
+    post.processor.chain: com.mongodb.kafka.connect.sink.processor.BlockListKeyProjector
+    key.projection.type: BlockList
+    key.projection.list: createdAt,updatedAt,__v
+    output.json.formatter: com.mongodb.kafka.connect.source.json.formatter.SimplifiedJson
+---
+#Last Time when I change this
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/payment?replicaSet=mongodb&authSource=admin
+    topics: ambel-sync.dashboard.subscriptions
+    database: payment
+    collection: subscriptions
+    # Use BsonConver
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.ProvidedInValueStrategy
+    #document.id.strategy.partial.value.projection.list: _id
+    #document.id.strategy.partial.value.projection.type: AllowList
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.ReplaceOneDefaultStrategy
+    document.id.strategy.overwrite.existing: true  # Force the sink to use the source's _id
+    delete.on.null.values: false
+    key.converter.schemas.enable: false
+    value.converter.schemas.enable: false
+    post.processor.chain: com.mongodb.kafka.connect.sink.processor.BlockListKeyProjector
+    key.projection.type: BlockList
+    key.projection.list: createdAt,updatedAt,__v
+
+
+---
+#lastest tested sink upadte with expected allowlist
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink-users-notifications
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: com.mongodb.kafka.connect.MongoSinkConnector
+  tasksMax: 1
+  config:
+    connection.uri: mongodb://admin:Am2512%40app@mongodb-svc.mongodb.svc.cluster.local:27017/notification?replicaSet=mongodb&authSource=admin
+    topics: ambel-sync-notification.dashboard.users
+    database: notification
+    collection: users
+
+    # Use BsonConver
+    # Use the _id field from the document (as produced by the source) for upserts
+    document.id.strategy: com.mongodb.kafka.connect.sink.processor.id.strategy.ProvidedInValueStrategy
+    document.id.strategy.overwrite.existing: true
+
+    # Use JSON converters with schemas enabled (structured records)
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: true
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: true
+
+    # Upsert: update if a document with the same _id exists, insert if not
+    writemodel.strategy: com.mongodb.kafka.connect.sink.writemodel.strategy.ReplaceOneDefaultStrategy
+
+    post.processor.chain: com.mongodb.kafka.connect.sink.processor.AllowListValueProjector
+    value.projection.type: AllowList
+    value.projection.list: _id, email, full_name, account_type, is_active, status

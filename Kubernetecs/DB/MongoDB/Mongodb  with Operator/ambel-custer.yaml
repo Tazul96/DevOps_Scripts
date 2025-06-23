@@ -1,0 +1,116 @@
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongodb
+  namespace: mongodb
+spec:
+  members: 2
+  type: ReplicaSet
+  version: "8.0.0"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  prometheus:
+    username: prometheus
+    passwordSecretRef:
+      name: metrics-endpoint-password
+    metricsPath: /metrics
+    port: 9216
+  users:
+    - name: admin
+      db: admin
+      passwordSecretRef:
+        name: ambel-db
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWriteAnyDatabase
+          db: admin
+      scramCredentialsSecretName: my-scram
+  additionalMongodConfig:
+    net.bindIp: "0.0.0.0"
+    net.maxIncomingConnections: 100000
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+    storage.wiredTiger.engineConfig.cacheSizeGB: 1
+  statefulSet:
+    spec:
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: mongodb
+        spec:
+          initContainers:
+          - command:
+              - chown
+              - -R
+              - "2000"
+              - /data
+            image: busybox
+            volumeMounts:
+            - mountPath: /data
+              name: data-volume
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+            name: change-dir-permissions
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app.kubernetes.io/name
+                          operator: In
+                          values:
+                            - mongodb
+                    topologyKey: kubernetes.io/hostname
+      volumeClaimTemplates:
+        - metadata:
+            name: data-volume
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: local-storage
+            resources:
+              requests:
+                storage: 8G
+            selector:
+              matchLabels:
+                type: data
+        - metadata:
+            name: logs-volume
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: local-storage
+            resources:
+              requests:
+                storage: 8G
+            selector:
+              matchLabels:
+                type: logs
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ambel-db
+  namespace: mongodb
+type: Opaque
+stringData:
+  password: Am2512@app
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metrics-endpoint-password
+  namespace: mongodb
+type: Opaque
+stringData:
+  password: S3cureP@ssw0rd123

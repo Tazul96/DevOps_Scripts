@@ -49,6 +49,8 @@ sudo chown -R 1001:1001 /mnt/data/postgresql-1
 sudo mkdir -p /mnt/data/postgresql-2
 sudo chown -R 1001:1001 /mnt/data/postgresql-2
 
+
+
 ---Step 5---
 
 expose to outside of the cluster through nginx
@@ -62,7 +64,7 @@ kubectl edit deploy ingress-nginx-controller -n ingress-nginx
 
 check connection
 nc -zv <external-ip> 5432
-
+nc -zv 94.72.112.45 5432
 ---Step 6---
 Get the credential and connect the database.
 
@@ -84,4 +86,10 @@ Rolling update
 kubectl patch cluster postgres-cluster --type merge \
   -p '{"spec":{"postgresql":{"parameters":{"max_connections":"200"}}}}'
 
+kubectl run -it --rm --namespace=postgres --image=postgres:latest postgres-client -- psql -h postgres-cluster-rw.postgres.svc.cluster.local -U postgres -d postgres
+
+
+DROP DATABASE "ambel-schedule-testing";
+CREATE DATABASE "ambel-schedule-testing";
+\q
 

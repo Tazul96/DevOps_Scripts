@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+data:
+  # Increases the number and size of buffers for large client headers.
+  large-client-header-buffers: "4 32k"
+  # Sets the size of the bffer used for reading the first part of the response from the proxied server.
+  proxy-buffer-size: "128k"
+  # Configures the number and size of buffers used for reading a response from the proxied server.
+  proxy-buffers: "4 256k"
+  # Sets the size of the buffer that may be busy sending a response to the client while the response is not yet fully read.
+  proxy-busy-buffers-size: "256k"

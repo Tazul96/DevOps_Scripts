@@ -1,0 +1,64 @@
+kubectl create ns kafka
+helm repo add strimzi https://strimzi.io/charts/
+helm repo update
+helm install strimzi strimzi/strimzi-kafka-operator -n kafka
+
+
+delete exiting path
+sudo rm -rf /mnt/data/kafka/*
+sudo rm -rf /mnt/data/zookeeper/*
+
+sudo mkdir -p /mnt/data/kafka
+sudo chown -R 1001:1001 /mnt/data/kafka
+
+sudo mkdir -p /mnt/data/zookeeper
+sudo chown -R 1001:1001 /mnt/data/zookeeper
+
+kubectl get kafka -n kafka
+kubectl describe kafka kafka -n kafka
+kubectl get pods -n kafka
+
+kubectl -n kafka run kafka-producer \
+-ti --image=quay.io/strimzi/kafka:0.42.0-kafka-3.7.1 \
+--rm=true --restart=Never \
+-- bin/kafka-console-producer.sh --bootstrap-server kafka-kafka-bootstrap:9092 --topic test-topic
+
+kubectl -n kafka run kafka-consumer \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bin/kafka-console-consumer.sh --bootstrap-server kafka-kafka-bootstrap:9092 --topic ambel-sync.dashboard.users --from-beginning
+
+
+kubectl -n kafka run kafka-consumer \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bin/kafka-console-consumer.sh --bootstrap-server kafka-kafka-bootstrap:9092 --topic ambel-sync.dashboard.subscriptions --from-beginning
+
+kubectl -n kafka run kafka-topic \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic ambel-sync.dashboard.users
+
+kubectl -n kafka run kafka-topic \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic ambel-sync.dashboard.subscriptions
+
+kubectl -n kafka run kafka-topic \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic ambel-sync-notification.dashboard.branchinfos
+
+env:
+
+kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+kafka-kafka-bootstrap.kafka:9092
+
+
+kafka-broker-0                   ClusterIP   10.110.2.169   <none>        9094/TCP                              38m
+kafka-kafka-bootstrap            ClusterIP   10.102.2.97    <none>        9091/TCP,9092/TCP                     18h
+kafka-kafka-brokers              ClusterIP   None           <none>        9090/TCP,9091/TCP,8443/TCP,9092/TCP   18h
+kafka-kafka-external-bootstrap
+
+
+kubectl get kafka kafka -n kafka -o yaml

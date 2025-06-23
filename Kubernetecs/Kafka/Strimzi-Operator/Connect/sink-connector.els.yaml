@@ -1,0 +1,55 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: elasticsearch-sink-connector
+  namespace: kafka
+spec:
+  class: io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
+  tasksMax: 1
+  config:
+    connection.url: http://elasticsearch-service:9200
+    topics: mongodb-sync.your_database.your_collection
+    type.name: _doc
+    key.ignore: false
+    schema.ignore: true
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: elasticsearch-sink
+  namespace: kafka
+spec:
+  class: io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
+  tasksMax: 2
+  config:
+    # Elasticsearch connection
+    connection.url: ${secret:elasticsearch-creds:url}
+    connection.username: ${secret:elasticsearch-creds:user}
+    connection.password: ${secret:elasticsearch-creds:password}
+
+    # Read from multiple Kafka topics
+    topics.regex: ambel-sync.production.*
+
+    # Dynamically map topics to Elasticsearch indices
+    index.name: ${topic:substringAfterLast(.)}
+
+    # Document ID strategy
+    key.ignore: false
+    schema.ignore: true
+
+    # Write mode (default is "index", can also be "update" or "upsert")
+    write.method: upsert
+
+    # Data type in Elasticsearch
+    type.name: _doc
+
+    # Batch processing settings
+    batch.size: 500
+    max.retries: 10
+    retry.backoff.ms: 5000
+
+    # Field Filtering (Masking)
+    transforms: dropFields
+    transforms.dropFields.type: org.apache.kafka.connect.transforms.ReplaceField$Value
+    transforms.dropFields.blacklist: field4, field5, field6

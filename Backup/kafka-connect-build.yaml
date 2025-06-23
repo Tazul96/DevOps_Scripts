@@ -1,0 +1,57 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: kafka-connect
+  namespace: kafka
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.9.0
+  replicas: 1
+  bootstrapServers: kafka-kafka-bootstrap:9092
+  build:
+    output:
+      type: docker
+      image: tazul96/kafka-connect-custom:latest
+      pushSecret: dockerhub-secret
+    plugins:
+      - name: debezium-connectors
+        artifacts:
+          - type: zip
+            url: https://repo1.maven.org/maven2/io/debezium/debezium-connector-mongodb/3.0.7.Final/debezium-connector-mongodb-3.0.7.Final-plugin.zip
+          - type: jar
+            url: https://repo1.maven.org/maven2/io/debezium/debezium-core/3.0.7.Final/debezium-core-3.0.7.Final.jar
+          - type: jar
+            url: https://repo1.maven.org/maven2/io/debezium/debezium-api/3.0.7.Final/debezium-api-3.0.7.Final.jar
+      - name: mongodb-connector
+        artifacts:
+          - type: jar
+            url: https://repo1.maven.org/maven2/org/mongodb/kafka/mongo-kafka-connect/1.15.0/mongo-kafka-connect-1.15.0-all.jar
+      - name: jdbc-connector
+        artifacts:
+          - type: jar
+            url: https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/10.7.4/kafka-connect-jdbc-10.7.4.jar
+          - type: jar
+            url: https://jdbc.postgresql.org/download/postgresql-42.7.5.jar
+      - name: kafka-connect-transforms
+        artifacts:
+          - type: jar
+            url: https://repo1.maven.org/maven2/org/apache/kafka/connect-transforms/3.9.0/connect-transforms-3.9.0.jar
+  config:
+    rest.advertised.host.name: "0.0.0.0"
+    group.id: connect-cluster
+    config.storage.replication.factor: 1
+    offset.storage.replication.factor: 1
+    status.storage.replication.factor: 1
+    security.protocol: PLAINTEXT
+  template:
+    connectContainer:
+      env:
+        - name: KAFKA_OPTS
+          value: "--add-opens=java.base/java.nio=ALL-UNNAMED"
+  readinessProbe:
+    initialDelaySeconds: 120
+    timeoutSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 120
+    timeoutSeconds: 10

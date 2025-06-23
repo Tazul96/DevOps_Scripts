@@ -1,0 +1,45 @@
+openssl req -new -x509 -nodes -days 365 \
+  -keyout ca.key -out ca.crt \
+  -subj "/CN=my-ca"
+
+kubectl create secret generic kafka-connect-ca-cert \
+  --from-file=ca.crt=ca.crt \
+  --namespace kafka
+
+kubectl create secret docker-registry dockerhub-secret \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=<your-dockerhub-username> \
+  --docker-password=<your-dockerhub-password> \
+  --docker-email=<your-email> \
+  -n kafka
+
+
+kubectl describe kafkaconnect kafka-connect -n kafka
+
+
+kubectl describe kafkaconnector mongodb-source-user -n kafka
+kubectl describe kafkaconnector mongodb-source -n kafka
+kubectl describe kafkaconnector mongodb-sink -n kafka
+kubectl describe kafkaconnector postgres-sink -n kafka
+kubectl describe kafkaconnector postgres-sink-invited -n kafka
+kubectl describe kafkaconnector postgres-sink-branch -n kafka
+
+mongodb-sink-users-notifications
+
+
+mongo.errors.tolerance: all
+
+kubectl describe kafkaconnector mongodb-source-users-notification -n kafka
+
+
+kubectl apply -f kafka-connect-src-mongo.yaml
+kubectl apply -f kafka-connect-sink-pg.yaml
+kubectl apply -f kafka-connect-sink-mongo.yaml
+
+kubectl delete -f kafka-connect-src-mongo.yaml
+kubectl delete -f kafka-connect-sink-pg.yaml
+kubectl delete -f kafka-connect-sink-mongo.yaml
+
+
+
+{"schema":{"type":"struct","fields":[{"type":"string","optional":true,"field":"_id"},{"type":"int32","optional":true,"field":"__v"},{"type":"string","optional":true,"field":"account_type"},{"type":"int64","optional":true,"name":"org.apache.kafka.connect.data.Timestamp","version":1,"field":"createdAt"},{"type":"struct","fields":[{"type":"string","optional":true,"field":"code"},{"type":"string","optional":true,"field":"symbol"}],"optional":true,"name":"currency","field":"currency"},{"type":"string","optional":true,"field":"email"},{"type":"string","optional":true,"field":"full_name"},{"type":"array","items":{"type":"string","optional":true},"optional":true,"name":"invited_practitioner","field":"invited_practitioner"},{"type":"array","items":{"type":"string","optional":true},"optional":true,"name":"invited_staff","field":"invited_staff"},{"type":"boolean","optional":true,"field":"is_active"},{"type":"string","optional":true,"field":"organization"},{"type":"string","optional":true,"field":"password"},{"type":"string","optional":true,"field":"practitioner"},{"type":"struct","fields":[{"type":"string","optional":true,"field":"alt"},{"type":"string","optional":true,"field":"src"}],"optional":true,"name":"profile_photo","field":"profile_photo"},{"type":"string","optional":true,"field":"provider_type"},{"type":"string","optional":true,"field":"status"},{"type":"int64","optional":true,"name":"org.apache.kafka.connect.data.Timestamp","version":1,"field":"updatedAt"},{"type":"string","optional":true,"field":"user_basic_info"},{"type":"string","optional":true,"field":"username"}],"optional":false,"name":"default"},"payload":{"_id":"67ab93e957078375581b0b28","__v":0,"account_type":"user","createdAt":1739297769104,"currency":{"code":"","symbol":""},"email":"tec@andinews.com","full_name":"Sayed","invited_practitioner":[],"invited_staff":[],"is_active":false,"organization":null,"password":"$2b$12$XxXv9c9jWSIPGeVagq9OF.Ub0ruY772Qol5nrzbwYq5vRtnE3dOxm","practitioner":null,"profile_photo":{"alt":"","src":""},"provider_type":"manual","status":"pending","updatedAt":1739297769104,"user_basic_info":null,"username":"tec1"}}

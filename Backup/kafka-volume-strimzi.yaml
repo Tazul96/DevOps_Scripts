@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-logs-pv
+  namespace: kafka
+  labels:
+    type: kafka-storage
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  #storageClassName: local-storage
+  hostPath:
+    path: /mnt/data/kafka
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zookeeper-data-pv
+  namespace: kafka
+  labels:
+    type: zookeeper-storage
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  #storageClassName: local-storage
+  hostPath:
+    path: /mnt/data/zookeeper

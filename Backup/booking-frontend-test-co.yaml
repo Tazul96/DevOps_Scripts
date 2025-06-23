@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-frontend-service
+  namespace: test
+  labels:
+    app: booking-frontend-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-frontend-service
+  template:
+    metadata:
+      labels:
+        app: booking-frontend-service
+    spec:
+      containers:
+      - name: booking-frontend-service
+        image: tazul96/ambel:Pro-booking-F-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3200
+      imagePullSecrets:
+        - name: dockerhub-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-frontend-service
+  namespace: test
+spec:
+  ports:
+  - port: 80
+    targetPort: 3200
+  selector:
+    app: booking-frontend-service
+  type: ClusterIP

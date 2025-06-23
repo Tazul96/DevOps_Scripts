@@ -1,0 +1,139 @@
+version: '3.3'
+
+services:
+  # Abexita WordPress (main site)
+  abexita:
+    image: wordpress:latest
+    container_name: abexita
+    environment:
+      WORDPRESS_DB_HOST: db_abexita:3306
+      WORDPRESS_DB_USER: wp_abexita
+      WORDPRESS_DB_PASSWORD: wp_password_abexita
+      WORDPRESS_DB_NAME: wp_database_abexita
+      VIRTUAL_HOST: abexita.com
+      VIRTUAL_PORT: 80
+      PHP_MEMORY_LIMIT: 512M
+      UPLOAD_MAX_FILESIZE: 512M
+      POST_MAX_SIZE: 512M
+    volumes:
+      - abexita_data:/var/www/html
+      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - db_abexita
+
+  # Abexita MySQL Database
+  db_abexita:
+    image: mysql:5.7
+    container_name: db_abexita
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_abexita
+      MYSQL_DATABASE: wp_database_abexita
+      MYSQL_USER: wp_abexita
+      MYSQL_PASSWORD: wp_password_abexita
+    volumes:
+      - db_abexita_data:/var/lib/mysql
+
+  # Abexita EasyPanel (managing WordPress)
+  easypanel_abexita:
+    image: easypanel/easypanel:2.1.0
+    container_name: easypanel_abexita
+    environment:
+      EASY_PANEL_DB_HOST: db_abexita
+      EASY_PANEL_DB_PORT: 3306
+      EASY_PANEL_DB_USER: wp_abexita
+      EASY_PANEL_DB_PASSWORD: wp_password_abexita
+      VIRTUAL_HOST: easypanel.abexita.com
+      VIRTUAL_PORT: 80
+    volumes:
+      - abexita_data:/var/www/html
+    depends_on:
+      - db_abexita
+    ports:
+      - "8081:80"  # EasyPanel exposed on port 8081
+
+  # The Latrice Experience WordPress
+  thelatriceexperience:
+    image: wordpress:latest
+    container_name: thelatriceexperience
+    environment:
+      WORDPRESS_DB_HOST: db_thelatriceexperience:3306
+      WORDPRESS_DB_USER: wp_user_thelatriceexperience
+      WORDPRESS_DB_PASSWORD: wp_password_thelatriceexperience
+      WORDPRESS_DB_NAME: wp_database_thelatriceexperience
+      VIRTUAL_HOST: thelatriceexperience.com
+      VIRTUAL_PORT: 80
+      PHP_MEMORY_LIMIT: 512M
+      UPLOAD_MAX_FILESIZE: 512M
+      POST_MAX_SIZE: 512M
+    volumes:
+      - thelatriceexperience_data:/var/www/html
+    depends_on:
+      - db_thelatriceexperience
+    ports:
+      - "8082:80"  # The Latrice Experience site exposed on port 8082
+
+  # The Latrice Experience MySQL Database
+  db_thelatriceexperience:
+    image: mysql:5.7
+    container_name: db_thelatriceexperience
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_thelatriceexperience
+      MYSQL_DATABASE: wp_database_thelatriceexperience
+      MYSQL_USER: wp_user_thelatriceexperience
+      MYSQL_PASSWORD: wp_password_thelatriceexperience
+    volumes:
+      - db_thelatriceexperience_data:/var/lib/mysql
+
+  # The Latrice Experience EasyPanel
+  easypanel_thelatriceexperience:
+    image: easypanel/easypanel:2.1.0
+    container_name: easypanel_thelatriceexperience
+    environment:
+      EASY_PANEL_DB_HOST: db_thelatriceexperience
+      EASY_PANEL_DB_PORT: 3306
+      EASY_PANEL_DB_USER: wp_user_thelatriceexperience
+      EASY_PANEL_DB_PASSWORD: wp_password_thelatriceexperience
+      VIRTUAL_HOST: easypanel.thelatriceexperience.com
+      VIRTUAL_PORT: 80
+    volumes:
+      - thelatriceexperience_data:/var/www/html
+    depends_on:
+      - db_thelatriceexperience
+    ports:
+      - "8083:80"  # EasyPanel exposed on port 8083
+
+  # Nginx Reverse Proxy with SSL
+  reverse_proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx_reverse_proxy
+    environment:
+      DEFAULT_HOST: abexita.com
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/certificates:/etc/nginx/certificates
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - abexita
+      - thelatriceexperience
+      - easypanel_abexita
+      - easypanel_thelatriceexperience
+
+  # Let's Encrypt Companion for SSL
+  letsencrypt_companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt_companion
+    environment:
+      NGINX_PROXY_CONTAINER: nginx_reverse_proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./nginx/certificates:/etc/nginx/certificates
+    depends_on:
+      - reverse_proxy
+
+volumes:
+  abexita_data:
+  db_abexita_data:
+  thelatriceexperience_data:
+  db_thelatriceexperience_data:

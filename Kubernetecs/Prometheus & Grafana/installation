@@ -13,3 +13,7 @@ helm upgrade prometheus prometheus-community/kube-prometheus-stack --namespace m
 
 
 helm uninstall prometheus -n monitoring
+
+
+
+kubectl edit prometheuses.monitoring.coreos.com prometheus-kube-prometheus-prometheus -n monitoring
