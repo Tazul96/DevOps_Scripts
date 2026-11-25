@@ -1,0 +1,7 @@
+Delete unnecessary redis dump file
+
+sudo find /mnt/data/redis-0 -maxdepth 1 -type f -name 'core.*' -delete
+
+
+Remove unnecessary container unused images
+sudo crictl --runtime-endpoint unix:///run/containerd/containerd.sock rmi --prune

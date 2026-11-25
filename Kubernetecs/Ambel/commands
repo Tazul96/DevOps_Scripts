@@ -28,3 +28,12 @@ kubectl apply -f message-frontend-test-co.yaml
 
 
 kubectl get pods -n test
+
+
+
+kubectl create secret docker-registry dockerhub-secret \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=tazul96 \
+  --docker-password=Ta@91912113 \
+  --docker-email=ttazulislam96@gmail.com \
+  -n test

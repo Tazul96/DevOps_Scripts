@@ -243,3 +243,45 @@ sudo chmod +x /opt/cni/bin/calico*
 # Create CNI config
 sudo mkdir -p /etc/cni/net.d
 sudo curl -L https://docs.projectcalico.org/manifests/cni-default-network.yaml -o /etc/cni/net.d/10-calico.conflist
+
+
+
+To dedicated a pod and stop automatic schedule
+
+kubectl taint nodes worker-4 dedicated=only-this:NoSchedule
+    spec:
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "only-this"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - worker-5
+
+
+
+Level to Pod affinity
+kubectl label node worker-1 redis-node=true
+kubectl label node worker-2 redis-node=true
+
+
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: redis-node
+            operator: In
+            values:
+              - "true"
+
+
+kubectl taint nodes worker- custom-taint-key:NoSchedule-

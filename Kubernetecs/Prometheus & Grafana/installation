@@ -17,3 +17,16 @@ helm uninstall prometheus -n monitoring
 
 
 kubectl edit prometheuses.monitoring.coreos.com prometheus-kube-prometheus-prometheus -n monitoring
+
+
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set prometheus.nodeSelector.node=redis-node \
+  --set grafana.nodeSelector.node=redis-node \
+  --set alertmanager.nodeSelector.node=redis-node \
+  --set prometheusOperator.nodeSelector.node=redis-node \
+  --wait --timeout 10m
+
+  
+18639
+20417

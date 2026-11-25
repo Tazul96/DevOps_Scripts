@@ -10,13 +10,33 @@ sudo rm -rf /mnt/data/zookeeper/*
 
 sudo mkdir -p /mnt/data/kafka
 sudo chown -R 1001:1001 /mnt/data/kafka
-
+sudo chmod 777 /mnt/data/kafka
 sudo mkdir -p /mnt/data/zookeeper
 sudo chown -R 1001:1001 /mnt/data/zookeeper
+sudo chmod 777 /mnt/data/zookeeper
 
 kubectl get kafka -n kafka
 kubectl describe kafka kafka -n kafka
 kubectl get pods -n kafka
+
+
+
+kubectl -n kafka run kafka-topic-list \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --list
+
+
+kubectl -n kafka run kafka-cleanup \
+-ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
+--rm=true --restart=Never \
+-- bash -c '
+  for topic in $(bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --list); do
+    echo "Deleting topic: $topic"
+    bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic "$topic"
+  done
+'
+
 
 kubectl -n kafka run kafka-producer \
 -ti --image=quay.io/strimzi/kafka:0.42.0-kafka-3.7.1 \
@@ -32,22 +52,22 @@ kubectl -n kafka run kafka-consumer \
 kubectl -n kafka run kafka-consumer \
 -ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
 --rm=true --restart=Never \
--- bin/kafka-console-consumer.sh --bootstrap-server kafka-kafka-bootstrap:9092 --topic ambel-sync.dashboard.subscriptions --from-beginning
+-- bin/kafka-console-consumer.sh --bootstrap-server kafka-kafka-bootstrap:9092 --topic deadletter-organizations --from-beginning
 
 kubectl -n kafka run kafka-topic \
 -ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
 --rm=true --restart=Never \
--- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic ambel-sync.dashboard.users
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic broker-schedule.create-online-booking-co
 
 kubectl -n kafka run kafka-topic \
 -ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
 --rm=true --restart=Never \
--- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic ambel-sync.dashboard.subscriptions
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic broker-shop.notification-ca
 
 kubectl -n kafka run kafka-topic \
 -ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 \
 --rm=true --restart=Never \
--- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic ambel-sync-notification.dashboard.branchinfos
+-- bin/kafka-topics.sh --bootstrap-server kafka-kafka-bootstrap:9092 --delete --topic broker-customer.confirm-invitation-co
 
 env:
 

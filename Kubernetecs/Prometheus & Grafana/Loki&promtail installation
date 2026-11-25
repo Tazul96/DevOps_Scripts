@@ -1,0 +1,67 @@
+#install loki and promtail
+
+helm template loki grafana/loki-stack \
+  --namespace monitoring \
+  --set promtail.enabled=true \
+  --set grafana.enabled=false \
+  --set loki.persistence.enabled=true \
+  --set loki.persistence.storageClassName=local-storage \
+  --set loki.persistence.size=5Gi
+
+
+
+kubectl get configmap prometheus-kube-prometheus-grafana-datasource -n monitoring -o yaml > grafana-datasource.yaml
+
+
+--- grafana-datasource.yaml ---
+apiVersion: 1
+datasources:
+- name: "Prometheus"
+  type: prometheus
+  uid: prometheus
+  url: http://prometheus-kube-prometheus-prometheus.monitoring:9090/
+  access: proxy
+  isDefault: true
+  jsonData:
+    httpMethod: POST
+    timeInterval: 30s
+- name: "Alertmanager"
+  type: alertmanager
+  uid: alertmanager
+  url: http://prometheus-kube-prometheus-alertmanager.monitoring:9093/
+  access: proxy
+  jsonData:
+    handleGrafanaManagedAlerts: false
+    implementation: prometheus
+- name: "Loki"
+  type: loki
+  uid: loki
+  url: http://loki.monitoring.svc.cluster.local:3100
+  access: proxy
+  isDefault: false
+  editable: false
+  version: 1
+
+
+kubectl exec -n monitoring -it $(kubectl get pod -n monitoring -l app.kubernetes.io/name=grafana -o jsonpath='{.items[0].metadata.name}') -- sh
+ls /etc/grafana/provisioning/datasources/
+cat /etc/grafana/provisioning/datasources/datasource.yaml
+
+
+kubectl get configmap -n monitoring | grep loki
+kubectl edit configmap loki-loki-stack -n monitoring
+data:
+  loki-stack-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki:3100
+      isDefault: true
+
+url: http://loki.monitoring.svc.cluster.local:3100
+
+
+
+kubectl rollout restart deployment prometheus-grafana -n monitoring

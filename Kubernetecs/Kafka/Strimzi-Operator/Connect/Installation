@@ -17,12 +17,31 @@ kubectl create secret docker-registry dockerhub-secret \
 kubectl describe kafkaconnect kafka-connect -n kafka
 
 
-kubectl describe kafkaconnector mongodb-source-user -n kafka
-kubectl describe kafkaconnector mongodb-source -n kafka
-kubectl describe kafkaconnector mongodb-sink -n kafka
-kubectl describe kafkaconnector postgres-sink -n kafka
-kubectl describe kafkaconnector postgres-sink-invited -n kafka
+kubectl describe kafkaconnector mongodb-source-invitedpractitioners-ca -n kafka
+kubectl describe kafkaconnector mongodb-source-users -n kafka
+kubectl describe kafkaconnector postgres-sink-user-pro-ca -n kafka
+kubectl describe kafkaconnector mongodb-source-org-ca -n kafka
+kubectl describe kafkaconnector postgres-sink-org-ca kafka
+kubectl describe kafkaconnector mongodb-source-practitioners-ca -n kafka
+kubectl describe kafkaconnector postgres-sink-practitioner-ca -n kafka
+kubectl describe kafkaconnector mongodb-source-branch-ca -n kafka
+kubectl describe kafkaconnector postgres-sink-branch-ca -n kafka
+kubectl describe kafkaconnector mongodb-source-invitedpractitioners-ca -n kafka
+kubectl describe kafkaconnector mongodb-source-branch-ca -n kafka
 kubectl describe kafkaconnector postgres-sink-branch -n kafka
+
+kubectl describe kafkaconnector mongodb-source-branch -n kafka
+kubectl describe kafkaconnector postgres-sink-branch -n kafka
+
+kubectl describe kafkaconnector postgres-sink-invited -n kafka
+
+kubectl describe kafkaconnector mongodb-source-users -n kafka
+
+kubectl describe kafkaconnector mongodb-source-invitedpractitioners -n kafka
+
+
+
+
 
 mongodb-sink-users-notifications
 
@@ -43,3 +62,123 @@ kubectl delete -f kafka-connect-sink-mongo.yaml
 
 
 {"schema":{"type":"struct","fields":[{"type":"string","optional":true,"field":"_id"},{"type":"int32","optional":true,"field":"__v"},{"type":"string","optional":true,"field":"account_type"},{"type":"int64","optional":true,"name":"org.apache.kafka.connect.data.Timestamp","version":1,"field":"createdAt"},{"type":"struct","fields":[{"type":"string","optional":true,"field":"code"},{"type":"string","optional":true,"field":"symbol"}],"optional":true,"name":"currency","field":"currency"},{"type":"string","optional":true,"field":"email"},{"type":"string","optional":true,"field":"full_name"},{"type":"array","items":{"type":"string","optional":true},"optional":true,"name":"invited_practitioner","field":"invited_practitioner"},{"type":"array","items":{"type":"string","optional":true},"optional":true,"name":"invited_staff","field":"invited_staff"},{"type":"boolean","optional":true,"field":"is_active"},{"type":"string","optional":true,"field":"organization"},{"type":"string","optional":true,"field":"password"},{"type":"string","optional":true,"field":"practitioner"},{"type":"struct","fields":[{"type":"string","optional":true,"field":"alt"},{"type":"string","optional":true,"field":"src"}],"optional":true,"name":"profile_photo","field":"profile_photo"},{"type":"string","optional":true,"field":"provider_type"},{"type":"string","optional":true,"field":"status"},{"type":"int64","optional":true,"name":"org.apache.kafka.connect.data.Timestamp","version":1,"field":"updatedAt"},{"type":"string","optional":true,"field":"user_basic_info"},{"type":"string","optional":true,"field":"username"}],"optional":false,"name":"default"},"payload":{"_id":"67ab93e957078375581b0b28","__v":0,"account_type":"user","createdAt":1739297769104,"currency":{"code":"","symbol":""},"email":"tec@andinews.com","full_name":"Sayed","invited_practitioner":[],"invited_staff":[],"is_active":false,"organization":null,"password":"$2b$12$XxXv9c9jWSIPGeVagq9OF.Ub0ruY772Qol5nrzbwYq5vRtnE3dOxm","practitioner":null,"profile_photo":{"alt":"","src":""},"provider_type":"manual","status":"pending","updatedAt":1739297769104,"user_basic_info":null,"username":"tec1"}}
+
+
+
+#!/bin/bash
+
+FILES=(
+  "kafka-connect-src-mongo-branch-info-noti.yaml"
+  "kafka-connect-src-mongo-branch-invited.yaml"
+  "kafka-connect-src-mongo-branch-noti.yaml"
+  "kafka-connect-src-mongo-branch.yaml"
+  "kafka-connect-src-mongo-brand-noti.yaml"
+  "kafka-connect-src-mongo-invpract.yaml"
+  "kafka-connect-src-mongo-org-noti.yaml"
+  "kafka-connect-src-mongo-org.yaml"
+  "kafka-connect-src-mongo-pract-noti.yaml"
+  "kafka-connect-src-mongo-pract.yaml"
+  "kafka-connect-src-mongo-sub.yaml"
+  "kafka-connect-src-mongo-user-noti.yaml"
+  "kafka-connect-src-mongo-user.yaml"
+)
+
+for file in "${FILES[@]}"; do
+  echo "Deleting $file..."
+  kubectl delete -f "$file" --ignore-not-found=true
+
+  echo "Applying $file..."
+  kubectl apply -f "$file"
+done
+
+
+
+#!/bin/bash
+
+FILES=(
+  "kafka-connect-src-mongo-user-noti-ca.yaml"
+  "kafka-connect-src-mongo-user-ca.yaml"
+  "kafka-connect-src-mongo-sub-ca.yaml"
+  "kafka-connect-src-mongo-pract-noti-ca.yaml"
+  "kafka-connect-src-mongo-pract-ca.yaml"
+  "kafka-connect-src-mongo-org-noti-ca.yaml"
+  "kafka-connect-src-mongo-org-ca.yaml"
+  "kafka-connect-src-mongo-invpract-ca.yaml"
+  "kafka-connect-src-mongo-brand-noti-ca.yaml"
+  "kafka-connect-src-mongo-branch-noti-ca.yaml"
+  "kafka-connect-src-mongo-branch-invited-ca.yaml"
+  "kafka-connect-src-mongo-branch-info-noti-ca.yaml"
+  "kafka-connect-src-mongo-branch-ca.yaml"
+)
+
+for file in "${FILES[@]}"; do
+  echo "Deleting $file..."
+  kubectl delete -f "$file" --ignore-not-found=true
+
+  echo "Applying $file..."
+  kubectl apply -f "$file"
+done
+
+
+
+#!/bin/bash
+
+FILES=(
+  "kafka-connect-src-mongo-branch-info-noti.yaml"
+  "kafka-connect-src-mongo-branch-invited.yaml"
+  "kafka-connect-src-mongo-branch-noti.yaml"
+  "kafka-connect-src-mongo-branch.yaml"
+  "kafka-connect-src-mongo-brand-noti.yaml"
+  "kafka-connect-src-mongo-invpract.yaml"
+  "kafka-connect-src-mongo-org-noti.yaml"
+  "kafka-connect-src-mongo-org.yaml"
+  "kafka-connect-src-mongo-pract-noti.yaml"
+  "kafka-connect-src-mongo-pract.yaml"
+  "kafka-connect-src-mongo-sub.yaml"
+  "kafka-connect-src-mongo-user-noti.yaml"
+  "kafka-connect-src-mongo-user.yaml"
+)
+
+for file in "${FILES[@]}"; do
+  echo "Deleting $file..."
+  kubectl delete -f "$file" --ignore-not-found=true
+
+  echo "Applying $file..."
+  kubectl apply -f "$file"
+done
+
+
+Sink Test
+
+#!/bin/bash
+
+FILES=(
+  "kafka-connect-sink-pg-prac-ca.yaml"
+  "kafka-connect-sink-pg-org-ca.yaml"
+  "kafka-connect-sink-pg-invite-ca.yaml"
+  "kafka-connect-sink-pg-ca.yaml"
+  "kafka-connect-sink-pg-bran-ca.yaml"
+  "kafka-connect-sink-mongo-user-noti-ca.yaml"
+  "kafka-connect-sink-mongo-sub-ca.yaml"
+  "kafka-connect-sink-mongo-pract-noti-ca.yaml"
+  "kafka-connect-sink-mongo-org-noti-ca.yaml"
+  "kafka-connect-sink-mongo-invited-noti-ca.yaml"
+  "kafka-connect-sink-mongo-branding-noti-ca.yaml"
+  "kafka-connect-sink-mongo-branch-noti-ca.yaml"
+  "kafka-connect-sink-mongo-branchinfo-noti-ca.yaml"
+)
+
+for file in "${FILES[@]}"; do
+  echo "Deleting $file..."
+  kubectl delete -f "$file" --ignore-not-found=true
+
+  echo "Applying $file..."
+  kubectl apply -f "$file"
+done
+
+
+
+#Command to run
+
+chmod +x deploy.sh
+./deploy.sh

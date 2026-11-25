@@ -18,9 +18,9 @@ sudo chown -R 1001:1001 /data/db/.mongodb
 sudo chown -R 999:999 /mnt/data/mongodb-*
 sudo chown -R 777 /mnt/data/mongodb-*
 
-sudo mkdir -p /mnt/data/mongodb-{0,1}
-sudo chmod -R 777 /mnt/data/mongodb-{0,1}  # For testing
-sudo chown -R 999:999 /mnt/data/mongodb-{0,1}  # 999 is default MongoDB UID
+sudo mkdir -p /mnt/data/mongodb-{0,1,2}
+sudo chmod -R 777 /mnt/data/mongodb-{0,1,2}  # For testing
+sudo chown -R 999:999 /mnt/data/mongodb-{0,1,2}  # 999 is default MongoDB UID
 
 sudo chmod -R 777 /mnt/data/mongodb-2  # For testing
 sudo chown -R 999:999 /mnt/data/mongodb-2
@@ -37,6 +37,8 @@ mongodb://admin:password@mongodb-0.mongodb-svc.mongodb.svc.cluster.local:27017/m
 mongodb://admin:Am2512%40app@mongodb-0.mongodb-svc.mongodb.svc.cluster.local:27017/mydb?replicaSet=mongo
 
 kubectl exec -n mongodb -it mongodb-0 -- mongosh -u admin -p Am2512@app
+
+rs.status()
 
 rs.initiate({
   _id: "mongodb",

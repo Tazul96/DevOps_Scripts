@@ -25,3 +25,10 @@ kubectl get svc -n ingress-nginx
 
 kubectl exec -it <nginx-ingress-pod-name> -n ingress-nginx -- /bin/sh
 cat /etc/nginx/nginx.conf | grep -E "large_client_header_buffers|proxy_buffer_size|proxy_buffers|proxy_busy_buffers_size"
+
+
+
+kubectl edit svc ingress-nginx-controller -n ingress-nginx
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 94.72.112.45

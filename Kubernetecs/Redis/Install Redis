@@ -45,3 +45,39 @@ helm install redis bitnami/redis \
   --set persistence.size=10Gi \
   --set persistence.storageClass="manual" \
   --set master.configuration="appendonly yes"
+
+
+
+#Command to check the state
+
+kubectl get endpoints redis-master -o wide
+kubectl exec -it redis-0 -- redis-cli INFO replication | grep role
+kubectl exec -it redis-1 -- redis-cli INFO replication | grep role
+
+
+
+If that’s the case, manually promote redis-0:
+
+kubectl exec -it redis-0 -- redis-cli
+> SLAVEOF NO ONE
+
+
+Demote redis-1 to a replica
+
+kubectl exec -it redis-1 -- redis-cli
+> SLAVEOF redis-0.redis-headless.default.svc.cluster.local 6379
+> exit
+
+
+kubectl exec -it redis-0 -- redis-cli INFO replication | grep connected_slaves
+
+
+Let’s point Redis to the right hostname:
+
+kubectl exec -it redis-1 -- redis-cli
+> SLAVEOF redis-0.redis.default.svc.cluster.local 6379
+> exit
+
+
+kubectl rollout restart statefulset redis
+kubectl delete pod redis-0 redis-1
